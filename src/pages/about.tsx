@@ -18,6 +18,7 @@ type AboutPageProps = {
     council: CouncilMember[];
     faculty: FacultyMember[];
     wheelCategories: Record<string, WheelMember[]>;
+    galleryMembers?: any[];
   } | null;
 };
 
@@ -30,6 +31,9 @@ export default function AboutPage({ initialData }: AboutPageProps) {
   const [faculty, setFaculty] = useState<FacultyMember[]>(initialData?.faculty || defaultFaculty);
   const [wheelCategories, setWheelCategories] = useState<Record<string, WheelMember[]>>(
     initialData?.wheelCategories || {}
+  );
+  const [galleryMembers, setGalleryMembers] = useState<any[]>(
+    initialData?.galleryMembers || []
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -45,6 +49,7 @@ export default function AboutPage({ initialData }: AboutPageProps) {
           setCouncil(data.council);
           if (data.faculty) setFaculty(data.faculty);
           if (data.wheelCategories) setWheelCategories(data.wheelCategories);
+          if (data.galleryMembers) setGalleryMembers(data.galleryMembers);
         }
       })
       .catch(() => {})
@@ -52,6 +57,16 @@ export default function AboutPage({ initialData }: AboutPageProps) {
   }, [initialData]);
 
   const allVerifiedMembers = useMemo(() => {
+    if (galleryMembers && galleryMembers.length > 0) {
+      return galleryMembers.map((m: any) => ({
+        id: m.id,
+        image: m.photoUrl,
+        title: m.name,
+        role: `${m.role} • ${m.team}`,
+        data: m,
+      }));
+    }
+
     const all = Object.values(wheelCategories)
       .flat()
       .map((m) => ({
@@ -95,7 +110,7 @@ export default function AboutPage({ initialData }: AboutPageProps) {
         role: m.role,
         data: m,
       }));
-  }, [wheelCategories, council]);
+  }, [wheelCategories, council, galleryMembers]);
 
   return (
     <>

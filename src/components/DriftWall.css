@@ -1,3 +1,5 @@
+/* ─── DriftWall – Performance-optimised styles ─────────────────────────────── */
+
 .drift-wall {
   position: relative;
   width: 100%;
@@ -16,7 +18,9 @@
   --dw-dim: 0.68;
   --dw-gray: 0;
   --dw-overlay: #060010;
-  contain: layout paint;
+  /* Isolate the entire wall from page repaints */
+  contain: layout paint style;
+  isolation: isolate;
 }
 
 .drift-wall.is-dragging,
@@ -24,7 +28,7 @@
   cursor: grabbing !important;
 }
 
-/* High-performance vignette overlay without expensive mask-composite */
+/* High-performance vignette overlay */
 .drift-wall::after {
   content: '';
   position: absolute;
@@ -69,6 +73,10 @@
   flex: 0 0 auto;
   outline: none;
   transform-style: preserve-3d;
+  /* content-visibility: auto tells the browser to skip rendering tiles
+     that are outside the viewport — massive paint savings. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto calc(var(--dw-tile-h) + var(--dw-gap));
 }
 
 .drift-wall__inner {
@@ -89,6 +97,46 @@
     border-color 0.25s ease;
 }
 
+/* ─── Lazy Image Wrapper ─────────────────────────────────────────────────────── */
+.dw-img-wrapper {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* ─── Skeleton Shimmer ───────────────────────────────────────────────────────── */
+.dw-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(26, 6, 51, 0.9) 0%,
+    rgba(50, 15, 90, 0.95) 40%,
+    rgba(80, 20, 130, 0.85) 50%,
+    rgba(50, 15, 90, 0.95) 60%,
+    rgba(26, 6, 51, 0.9) 100%
+  );
+  background-size: 200% 100%;
+  animation: dw-shimmer 1.8s ease-in-out infinite;
+  border-radius: inherit;
+  will-change: background-position;
+}
+
+@keyframes dw-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* On reduced motion — static purple placeholder instead of animating shimmer */
+@media (prefers-reduced-motion: reduce) {
+  .dw-skeleton {
+    animation: none;
+    background: rgba(26, 6, 51, 0.9);
+  }
+}
+
+/* ─── Image styles ───────────────────────────────────────────────────────────── */
 .drift-wall__tile img {
   width: 100%;
   height: 100%;
@@ -99,8 +147,11 @@
   user-select: none;
   -webkit-user-drag: none;
   background: #110220;
+  /* Promote to composite layer so GPU handles the fade */
+  will-change: opacity;
 }
 
+/* ─── Overlay ────────────────────────────────────────────────────────────────── */
 .drift-wall__overlay {
   position: absolute;
   inset: 0;
@@ -110,7 +161,7 @@
   transition: opacity 0.35s ease;
 }
 
-/* Hidden by default on non-hover mode */
+/* ─── Tile info ──────────────────────────────────────────────────────────────── */
 .drift-wall__tile-info {
   position: absolute;
   bottom: 0;
@@ -147,7 +198,7 @@
   text-overflow: ellipsis;
 }
 
-/* Show name and role ONLY when hovered / active */
+/* ─── Active / Hover states ──────────────────────────────────────────────────── */
 .drift-wall__tile.is-active .drift-wall__inner,
 .drift-wall__tile:hover .drift-wall__inner,
 .drift-wall__tile:focus-visible .drift-wall__inner {
@@ -176,9 +227,19 @@
   transform: translateY(0);
 }
 
+/* ─── Reduced motion ─────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .drift-wall__plane,
   .drift-wall__track {
     will-change: auto;
   }
+}
+
+/* ─── Low-quality network: disable heavy transitions ─────────────────────────── */
+.drift-wall--q-low .drift-wall__inner {
+  transition: opacity 0.1s ease;
+}
+
+.drift-wall--q-low .dw-skeleton {
+  animation-duration: 2.4s;
 }

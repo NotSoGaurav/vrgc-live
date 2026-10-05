@@ -1,6 +1,5 @@
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/utils/firebase/client";
-import { createClient } from "@supabase/supabase-js";
 
 
 export type CouncilMember = {
@@ -39,14 +38,6 @@ export type WheelMember = {
   bio: string;
 };
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "";
-
-// Guard: only create the client if the URL is present.
-// When Supabase is blocked/unconfigured, fetchClubData returns empty data gracefully.
-export const supabase = supabaseUrl && supabaseKey
-  ? createClient(supabaseUrl, supabaseKey)
-  : null;
 
 // Fallback faculty data
 export const facultyMembers: FacultyMember[] = [
@@ -117,17 +108,8 @@ function withTimeout<T>(promise: PromiseLike<T>, ms = 5000): Promise<T | null> {
 export async function fetchClubData() {
   try {
     // Parallelise async data sources with a 5s timeout each
-    const [membersResult, idCardsResult] = await Promise.allSettled([
-      withTimeout(getDocs(collection(db, "members")).catch(() => null), 5000),
-      supabase
-        ? withTimeout(
-            supabase
-              .from("id_cards")
-              .select("id, registrationNumber, name, email, team, position, role, photoUrl, description, bio")
-              .then((r) => r),
-            5000
-          )
-        : Promise.resolve(null),
+    const [membersResult] = await Promise.allSettled([
+      withTimeout(getDocs(collection(db, "members")).catch((err) => { console.error("Firestore fetch error:", err); return null; }), 5000),
     ]);
 
     // null means timed out; treat the same as a failed promise
@@ -135,13 +117,6 @@ export async function fetchClubData() {
       membersResult.status === "fulfilled" && membersResult.value
         ? (membersResult.value as any).docs?.map((d: any) => ({ id: d.id, ...d.data() })) ?? []
         : [];
-
-    const idCardsData: Array<Record<string, string>> =
-      idCardsResult.status === "fulfilled" && idCardsResult.value
-        ? ((idCardsResult.value as any).data as Array<Record<string, string>>) ?? []
-        : [];
-
-    const idCards: Array<Record<string, string>> = idCardsData;
 
     /**
      * Resolves member photo directly from public/members/ using deterministic UUIDv5
@@ -152,11 +127,29 @@ export async function fetchClubData() {
     );
 
     // Helper that returns a deterministic URL only for core members
-    const getCorePhotoUrl = (regNo?: string): string => {
+    const getCorePhotoUrl = (regNo?: string, role?: string, team?: string): string => {
       if (!regNo) return "";
-      const cleaned = regNo.trim();
-      if (!coreRegSet.has(cleaned)) return ""; // not a core member
-      return `/members/${cleaned}.webp`;
+      const cleaned = regNo.trim().toUpperCase();
+      if (!coreRegSet.has(cleaned) && !coreRegSet.has(regNo.trim())) return ""; // not a core member
+      
+      const roleLower = (role || "").toLowerCase();
+      const teamLower = (team || "").toLowerCase();
+      
+      let targetDir = "members/unknown";
+      if (roleLower.includes("president")) {
+        targetDir = "leadership/co-presidents";
+      } else if (roleLower.includes("coordinator")) {
+        targetDir = "leadership/coordinators";
+      } else if (teamLower.includes("leadership")) {
+        targetDir = "leadership/others";
+      } else if (roleLower.includes("faculty")) {
+        targetDir = "faculty";
+      } else if (team) {
+        const teamName = team.replace(/[^a-zA-Z0-9]/g, '_');
+        targetDir = `members/teams/${teamName}`;
+      }
+      
+      return `https://raw.githubusercontent.com/VRGC-vit/VRGCassets/main/${targetDir}/${cleaned}.webp`;
     };
 
     // 3. Extract Leadership members directly from id_cards table and Firestore (team = 'Leadership')
@@ -169,7 +162,7 @@ export async function fetchClubData() {
         const itemReg = (item.id || "").toLowerCase().replace(/[^a-z0-9]/g, "");
         return cleanReg && itemReg && cleanReg === itemReg;
       });
-      const photo = getCorePhotoUrl(c.registrationNumber || c.id);
+      const photo = getCorePhotoUrl(c.registrationNumber || c.id, c.position || c.role, c.team);
       if (existing) {
         if (!existing.bio && (c.description || c.bio)) {
           existing.bio = c.description || c.bio;
@@ -192,14 +185,6 @@ export async function fetchClubData() {
         bio: c.description || c.bio || "",
       });
     };
-    // Filter id_cards with Leadership team or role
-    idCards
-      .filter((c) => 
-        (c.team || "").toLowerCase().includes("leadership") || 
-        /(president|executive|leadership|coordinator)/i.test(c.position || c.role || "")
-      )
-      .forEach(addLeadCandidate);
-
     // Filter rawMembers with Leadership team or role
     rawMembers
       .filter((m) => 
@@ -254,7 +239,7 @@ export async function fetchClubData() {
       const isMember = /member/i.test(position) || /coordinator/i.test(position);
       if (!isLead && !isMember) return;
 
-      const photo = getCorePhotoUrl(m.registrationNumber || m.id);
+      const photo = getCorePhotoUrl(m.registrationNumber || m.id, m.position || m.role, m.team);
       const teams = (m.team || "").split(/[,/\u0026]/).map((t: string) => t.trim());
 
       teams.forEach((t: string) => {
@@ -293,10 +278,41 @@ export async function fetchClubData() {
       });
     });
 
+    // 5. Fetch GitHub tree to get all images for DriftWall gallery
+    let galleryMembers: any[] = [];
+    try {
+      const githubTreeRes = await fetch("https://api.github.com/repos/VRGC-vit/VRGCassets/git/trees/main?recursive=1", {
+        headers: { "User-Agent": "VRGC-NextJS" }
+      });
+      if (githubTreeRes.ok) {
+        const githubTreeData = await githubTreeRes.json();
+        const githubFiles = (githubTreeData.tree || []).filter((f: any) => f.path.endsWith('.webp') || f.path.endsWith('.jpg') || f.path.endsWith('.png'));
+
+        galleryMembers = githubFiles.map((file: any) => {
+          const parts = file.path.split('/');
+          const filename = parts[parts.length - 1];
+          const regNo = filename.replace(/\.(webp|jpg|png)$/, '');
+          
+          const dbMember = rawMembers.find(m => (m.registrationNumber || m.id || "").toLowerCase() === regNo.toLowerCase());
+          
+          return {
+            id: regNo,
+            name: dbMember?.name || `Member ${regNo.toUpperCase()}`,
+            role: dbMember?.position || dbMember?.role || "Member",
+            team: dbMember?.team || "VRGC",
+            photoUrl: `https://raw.githubusercontent.com/VRGC-vit/VRGCassets/main/${file.path}`,
+          };
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch Github tree for DriftWall", err);
+    }
+
     return {
       council: finalCouncil,
       faculty: facultyMembers,
       wheelCategories: categoryMap,
+      galleryMembers,
     };
   } catch (error) {
     console.error("Error fetching club data from Firestore/Supabase:", error);
@@ -304,6 +320,7 @@ export async function fetchClubData() {
       council: defaultCouncilMembers,
       faculty: facultyMembers,
       wheelCategories: {},
+      galleryMembers: [],
     };
   }
 }

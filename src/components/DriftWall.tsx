@@ -1,4 +1,11 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 export interface DriftWallItem {
   id?: string;
@@ -6,7 +13,7 @@ export interface DriftWallItem {
   title?: string;
   role?: string;
   href?: string;
-  data?: any;
+  data?: unknown;
 }
 
 export interface DriftWallProps {
@@ -36,10 +43,32 @@ export interface DriftWallProps {
   onHoverItem?: (item: DriftWallItem | null) => void;
 }
 
+// ─── Adaptive Network Quality ─────────────────────────────────────────────────
+type NetQuality = 'high' | 'medium' | 'low';
+
+function getNetworkQuality(): NetQuality {
+  if (typeof navigator === 'undefined') return 'medium';
+  const conn = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+  if (!conn) return 'medium';
+  const effectiveType: string = conn.effectiveType || '';
+  if (effectiveType === '4g' && conn.downlink > 5) return 'high';
+  if (effectiveType === '4g' || effectiveType === '3g') return 'medium';
+  return 'low'; // 2g, slow-2g, or missing
+}
+
+// ─── Image quality sizing per network ─────────────────────────────────────────
+function buildSrc(src: string, quality: NetQuality, tileWidth: number): string {
+  // If it's a GitHub raw URL, we can't resize it — just return as-is.
+  // For picsum we can append sizing. We keep it as-is and rely on CSS/browser.
+  // The key perf win is *when* we set the src (IntersectionObserver below).
+  return src;
+}
+
+// ─── Default items ─────────────────────────────────────────────────────────────
 const DEFAULT_ITEMS: DriftWallItem[] = Array.from({ length: 15 }, (_, i) => {
   const ids = [1015, 1025, 1039, 1043, 1044, 1050, 1062, 1069, 1074, 1080, 1084, 106, 110, 133, 164];
   return {
-    image: `https://picsum.photos/id/${ids[i % ids.length]}/600/400`,
+    image: `https://picsum.photos/id/${ids[i % ids.length]}/400/270`,
     title: `Tile ${i + 1}`,
     href: undefined,
   };
@@ -55,6 +84,114 @@ const columnFactor = (index: number, variance: number) => {
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
+// ─── Lazy Image with Skeleton ─────────────────────────────────────────────────
+interface LazyTileImageProps {
+  src: string;
+  alt: string;
+  quality: NetQuality;
+  tileWidth: number;
+  onError?: () => void;
+}
+
+const LazyTileImage: React.FC<LazyTileImageProps> = ({ src, alt, quality, tileWidth, onError }) => {
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [error, setError] = useState(false);
+
+  // IntersectionObserver — only set `src` when tile enters extended viewport
+  useEffect(() => {
+    const el = imgRef.current;
+    if (!el) return;
+
+    // rootMargin: preload tiles ~300px before they scroll into view
+    const rootMarginVal = quality === 'low' ? '100px' : '300px';
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          // Set the real src now
+          const finalSrc = buildSrc(src, quality, tileWidth);
+          el.src = finalSrc;
+          observer.disconnect();
+          setRevealed(true);
+        }
+      },
+      { rootMargin: rootMarginVal, threshold: 0 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [src, quality, tileWidth]);
+
+  const handleLoad = useCallback(() => {
+    setLoaded(true);
+  }, []);
+
+  const handleError = useCallback(() => {
+    setError(true);
+    setLoaded(true);
+    if (onError) onError();
+  }, [onError]);
+
+  return (
+    <span className="dw-img-wrapper" style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
+      {/* Skeleton shimmer — visible until image loads */}
+      <span
+        className="dw-skeleton"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: loaded ? 0 : 1,
+          transition: 'opacity 0.4s ease',
+          pointerEvents: 'none',
+        }}
+        aria-hidden="true"
+      />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        ref={imgRef}
+        alt={alt}
+        draggable={false}
+        decoding="async"
+        // No loading="lazy" here — we control it manually via IntersectionObserver
+        // src intentionally left empty; set by observer above
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          display: 'block',
+          opacity: loaded ? 1 : 0,
+          transition: 'opacity 0.35s ease',
+          // Adaptive quality: downscale rendering on low-end devices
+          imageRendering: quality === 'low' ? 'auto' : undefined,
+        }}
+        onLoad={handleLoad}
+        onError={handleError}
+      />
+      {/* Error fallback */}
+      {error && (
+        <span
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(12, 2, 24, 0.8)',
+            color: '#a855f7',
+            fontSize: '1.5rem',
+          }}
+          aria-hidden="true"
+        >
+          ◈
+        </span>
+      )}
+    </span>
+  );
+};
+
+// ─── Main DriftWall ────────────────────────────────────────────────────────────
 export const DriftWall: React.FC<DriftWallProps> = ({
   items = DEFAULT_ITEMS,
   columns = 8,
@@ -95,7 +232,6 @@ export const DriftWall: React.FC<DriftWallProps> = ({
   const pointerDampedRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const lastTsRef = useRef<number | null>(null);
 
-  // High-performance hold & drag refs (RAF decoupled)
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const isDraggingRef = useRef<boolean>(false);
   const hasDraggedRef = useRef<boolean>(false);
@@ -105,10 +241,10 @@ export const DriftWall: React.FC<DriftWallProps> = ({
   const lastPointerPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const lastPointerTimeRef = useRef<number>(0);
 
-  // Mobile detection ref (updated in useEffect)
   const isMobileRef = useRef<boolean>(false);
-  // Frame counter for optional throttling
+  // Frame skip counter — only process every Nth frame on low-end devices
   const frameCountRef = useRef<number>(0);
+  const frameSkipRef = useRef<number>(1); // 1 = every frame, 2 = every other frame
 
   const [containerSize, setContainerSize] = useState<{ width: number; height: number }>({
     width: 1400,
@@ -118,13 +254,34 @@ export const DriftWall: React.FC<DriftWallProps> = ({
   const activeIdRef = useRef<string | null>(null);
   const [reduced, setReduced] = useState<boolean>(false);
 
+  // Adaptive network quality — sampled once on mount
+  const [netQuality, setNetQuality] = useState<NetQuality>('medium');
+
   useEffect(() => {
     isMobileRef.current = /Mobi|Android/i.test(navigator.userAgent);
     setReduced(prefersReducedMotion());
+
+    const q = getNetworkQuality();
+    setNetQuality(q);
+
+    // On low-end/slow connection: skip every other frame
+    if (q === 'low' || isMobileRef.current) {
+      frameSkipRef.current = 2;
+    }
+
+    // Listen for network quality changes
+    const conn = (navigator as any).connection;
+    const handleConnChange = () => setNetQuality(getNetworkQuality());
+    if (conn) conn.addEventListener('change', handleConnChange);
+
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
     const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
     mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
+
+    return () => {
+      mq.removeEventListener('change', onChange);
+      if (conn) conn.removeEventListener('change', handleConnChange);
+    };
   }, []);
 
   const safeItems = useMemo(() => {
@@ -132,15 +289,19 @@ export const DriftWall: React.FC<DriftWallProps> = ({
     return items;
   }, [items]);
 
+  // ── Chunk-based column distribution ─────────────────────────────────────────
+  // On low-end/mobile we use fewer columns to reduce DOM nodes drastically
   const dynamicColumns = useMemo(() => {
     const minColsForWidth = Math.ceil(containerSize.width / (tileWidth + gap)) + 2;
     const baseCols = Math.max(columns, minColsForWidth, 6);
-    if (isMobileRef.current) {
-      // Limit to at most 4 columns on mobile for performance
-      return Math.min(baseCols, 4);
+    if (isMobileRef.current || netQuality === 'low') {
+      return Math.min(baseCols, 4); // max 4 cols on mobile/slow
+    }
+    if (netQuality === 'medium') {
+      return Math.min(baseCols, 6); // max 6 cols on medium
     }
     return baseCols;
-  }, [columns, containerSize.width, tileWidth, gap, isMobileRef]);
+  }, [columns, containerSize.width, tileWidth, gap, netQuality]);
 
   const columnItems = useMemo(() => {
     const cols: DriftWallItem[][] = Array.from({ length: dynamicColumns }, () => []);
@@ -148,14 +309,18 @@ export const DriftWall: React.FC<DriftWallProps> = ({
     return cols.map((col) => (col.length ? col : safeItems.slice(0, 1)));
   }, [safeItems, dynamicColumns]);
 
+  // ── Adaptive copies — KEY perf improvement ──────────────────────────────────
+  // On low/medium: max 2 copies. On high: up to 3.
   const columnMeta = useMemo(() => {
     const unit = tileHeight + gap;
+    const maxCopies = netQuality === 'high' ? 3 : 2;
     return columnItems.map((col) => {
       const copyHeight = Math.max(unit, col.length * unit);
-      const copies = Math.max(2, Math.ceil((containerSize.height * 2) / copyHeight) + 1);
+      // Never exceed maxCopies — the infinite scroll still works because we wrap
+      const copies = Math.min(maxCopies, Math.max(2, Math.ceil((containerSize.height * 2) / copyHeight) + 1));
       return { copyHeight, copies };
     });
-  }, [columnItems, tileHeight, gap, containerSize.height]);
+  }, [columnItems, tileHeight, gap, containerSize.height, netQuality]);
 
   useIsomorphicLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -173,11 +338,13 @@ export const DriftWall: React.FC<DriftWallProps> = ({
 
   const baseVelocities = useMemo(() => {
     const dirSign = direction === 'up' ? 1 : -1;
+    // Slow down on low-quality to reduce perceived jank
+    const speedMod = netQuality === 'low' ? 0.6 : netQuality === 'medium' ? 0.8 : 1;
     return columnItems.map((_, c) => {
       const altSign = c % 2 === 0 ? 1 : -1;
-      return speed * columnFactor(c, variance) * dirSign * altSign;
+      return speed * speedMod * columnFactor(c, variance) * dirSign * altSign;
     });
-  }, [columnItems, speed, direction, variance]);
+  }, [columnItems, speed, direction, variance, netQuality]);
 
   useEffect(() => {
     offsetsRef.current = columnMeta.map((meta, c) => meta.copyHeight * ((c * 0.37) % 1));
@@ -189,20 +356,28 @@ export const DriftWall: React.FC<DriftWallProps> = ({
       const plane = planeRef.current;
       if (!plane) return;
       const t = isMobileRef.current ? 0.8 : 1.24;
-      plane.style.transform = `translate3d(-50%, -50%, ${-depth}px) scale(${t}) rotateX(${isMobileRef.current ? 0 : (tilt + py).toFixed(2)}deg) rotateY(${isMobileRef.current ? 0 : (turn + px).toFixed(2)}deg) rotateZ(${roll}deg)`;
+      plane.style.transform = `translate3d(-50%, -50%, ${-depth}px) scale(${t}) rotateX(${
+        isMobileRef.current ? 0 : (tilt + py).toFixed(2)
+      }deg) rotateY(${isMobileRef.current ? 0 : (turn + px).toFixed(2)}deg) rotateZ(${roll}deg)`;
     },
     [tilt, turn, roll, depth]
   );
 
+  // ── RAF Animation Loop ────────────────────────────────────────────────────────
   useEffect(() => {
     const animate = (ts: number) => {
       rafRef.current = requestAnimationFrame(animate);
+
+      // Hard skip when tab is hidden — saves CPU completely
       if (document.hidden) return;
+
       if (lastTsRef.current === null) lastTsRef.current = ts;
-      
+
       const dt = Math.min(0.05, Math.max(0.001, (ts - lastTsRef.current) / 1000));
       frameCountRef.current++;
-      if (frameCountRef.current % 2 !== 0 && !isMobileRef.current) return;
+
+      // Frame skipping: on mobile/low-end, process every other frame
+      if (frameCountRef.current % frameSkipRef.current !== 0) return;
       lastTsRef.current = ts;
 
       if (isDraggingRef.current) {
@@ -398,7 +573,7 @@ export const DriftWall: React.FC<DriftWallProps> = ({
     release();
   }, [release]);
 
-  // Native wheel listener to properly prevent default page scroll
+  // Native wheel listener
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -406,7 +581,6 @@ export const DriftWall: React.FC<DriftWallProps> = ({
       e.preventDefault();
       dragInertiaRef.current.y -= e.deltaY * 0.5;
       dragDeltaRef.current.y -= e.deltaY * 0.5;
-      
       dragInertiaRef.current.x -= e.deltaX * 0.5;
       dragDeltaRef.current.x -= e.deltaX * 0.5;
     };
@@ -431,35 +605,15 @@ export const DriftWall: React.FC<DriftWallProps> = ({
     [tileWidth, tileHeight, gap, radius, perspective, lift, dim, grayscale, overlayColor, style]
   );
 
+  // ── Render Tile ────────────────────────────────────────────────────────────
   const renderTile = (item: DriftWallItem, id: string, colIndex: number, itemIndex: number) => {
     const inner = (
       <span className="drift-wall__inner">
-        <span 
-          className="skeleton-shimmer-light" 
-          style={{ position: 'absolute', inset: 0, zIndex: 0, borderRadius: 'inherit' }} 
-        />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <LazyTileImage
           src={item.image}
           alt={item.title ?? ''}
-          loading="lazy"
-          decoding="async"
-          draggable={false}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block',
-            position: 'relative',
-            zIndex: 1,
-            transition: 'opacity 0.3s ease',
-          }}
-          onError={(e) => {
-            const target = e.currentTarget;
-            if (target.src !== '/vrgc_logo.jpg' && !target.src.endsWith('/vrgc_logo.jpg')) {
-              target.src = '/vrgc_logo.jpg';
-            }
-          }}
+          quality={netQuality}
+          tileWidth={tileWidth}
         />
         <span className="drift-wall__overlay" aria-hidden="true" style={{ zIndex: 2 }} />
         {item.title && (
@@ -470,6 +624,7 @@ export const DriftWall: React.FC<DriftWallProps> = ({
         )}
       </span>
     );
+
     const commonProps = {
       className: `drift-wall__tile${activeId === id ? ' is-active' : ''}`,
       'data-tile-id': id,
@@ -484,6 +639,7 @@ export const DriftWall: React.FC<DriftWallProps> = ({
         }
       },
     };
+
     if (item.href) {
       return (
         <a key={id} href={item.href} target="_blank" rel="noreferrer noopener" {...commonProps}>
@@ -502,6 +658,7 @@ export const DriftWall: React.FC<DriftWallProps> = ({
     'drift-wall',
     reduced ? 'drift-wall--reduced' : '',
     isDragging ? 'is-dragging' : '',
+    `drift-wall--q-${netQuality}`,
     className,
   ]
     .filter(Boolean)
@@ -528,8 +685,17 @@ export const DriftWall: React.FC<DriftWallProps> = ({
           const meta = columnMeta[c];
           const copies = Array.from({ length: meta.copies });
           return (
-            <div className="drift-wall__col" key={`col-${c}`} ref={(el) => { colRefs.current[c] = el; }} style={{ willChange: 'transform' }}>
-              <div className="drift-wall__track" ref={(el) => { trackRefs.current[c] = el; }} style={{ willChange: 'transform' }}>
+            <div
+              className="drift-wall__col"
+              key={`col-${c}`}
+              ref={(el) => { colRefs.current[c] = el; }}
+              style={{ willChange: 'transform' }}
+            >
+              <div
+                className="drift-wall__track"
+                ref={(el) => { trackRefs.current[c] = el; }}
+                style={{ willChange: 'transform' }}
+              >
                 {copies.map((_, copyIndex) =>
                   col.map((item, itemIndex) =>
                     renderTile(item, `${c}-${copyIndex}-${itemIndex}`, c, itemIndex)
