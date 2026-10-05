@@ -56,6 +56,12 @@
   width: calc(var(--dw-tile-w) + var(--dw-gap));
   transform-style: preserve-3d;
   flex-shrink: 0;
+  transition: z-index 0.2s;
+}
+
+.drift-wall__col:has(.drift-wall__tile:hover),
+.drift-wall__col:has(.drift-wall__tile.is-active) {
+  z-index: 50;
 }
 
 .drift-wall__track {
@@ -73,10 +79,18 @@
   flex: 0 0 auto;
   outline: none;
   transform-style: preserve-3d;
-  /* content-visibility: auto tells the browser to skip rendering tiles
-     that are outside the viewport — massive paint savings. */
+  /* Allow lifted tile to render completely outside bounds without cutting off */
+  overflow: visible;
   content-visibility: auto;
   contain-intrinsic-size: auto calc(var(--dw-tile-h) + var(--dw-gap));
+  transition: z-index 0.2s;
+}
+
+.drift-wall__tile:hover,
+.drift-wall__tile.is-active,
+.drift-wall__tile:focus-visible {
+  content-visibility: visible;
+  z-index: 60;
 }
 
 .drift-wall__inner {
@@ -88,13 +102,14 @@
   background: radial-gradient(circle at 50% 50%, #1a0633 0%, #0c0217 100%);
   border: 1px solid rgba(139, 92, 246, 0.28);
   opacity: var(--dw-dim);
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
   pointer-events: none;
   transition:
-    transform 0.35s cubic-bezier(0.2, 0.9, 0.36, 1),
-    opacity 0.35s ease,
-    box-shadow 0.35s ease,
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.3s ease,
+    box-shadow 0.38s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.25s ease;
+  will-change: transform, opacity;
 }
 
 /* ─── Lazy Image Wrapper ─────────────────────────────────────────────────────── */
@@ -325,14 +340,18 @@
   text-overflow: ellipsis;
 }
 
-/* ─── Active / Hover states ──────────────────────────────────────────────────── */
+/* ─── Active / Hover states: gentle upward lift & elevation without cutting off ─────── */
 .drift-wall__tile.is-active .drift-wall__inner,
 .drift-wall__tile:hover .drift-wall__inner,
 .drift-wall__tile:focus-visible .drift-wall__inner {
   opacity: 1;
-  transform: translateZ(var(--dw-lift));
-  border-color: #a855f7;
-  box-shadow: 0 20px 50px -15px rgba(124, 58, 237, 0.8), 0 0 25px rgba(168, 85, 247, 0.45);
+  /* Slightly lift up vertically (translateY) and in depth (translateZ) with subtle scale */
+  transform: translate3d(0, -9px, 45px) scale(1.04);
+  border-color: #c084fc;
+  box-shadow:
+    0 24px 50px -12px rgba(124, 58, 237, 0.75),
+    0 0 28px rgba(168, 85, 247, 0.5),
+    inset 0 0 15px rgba(168, 85, 247, 0.15);
 }
 
 .drift-wall__tile.is-active img,

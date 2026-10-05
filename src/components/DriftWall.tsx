@@ -109,39 +109,29 @@ const LazyTileImage: React.FC<LazyTileImageProps> = ({
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    setLoaded(false);
-    setError(false);
+  const finalSrc = src && !isSkeleton ? buildSrc(src, quality, tileWidth) : '';
 
-    if (!src || isSkeleton) return;
-
-    let active = true;
-    const finalSrc = buildSrc(src, quality, tileWidth);
-
-    // Preload image in memory with asynchronous decoding for smooth bulk loading
-    const preloader = new Image();
-    preloader.decoding = 'async';
-    preloader.src = finalSrc;
-
-    preloader.onload = () => {
-      if (!active) return;
-      if (imgRef.current) {
-        imgRef.current.src = finalSrc;
-      }
+  // Synchronous cache detection: if the browser already cached it, show immediately
+  useIsomorphicLayoutEffect(() => {
+    if (!finalSrc || isSkeleton) {
+      setLoaded(false);
+      return;
+    }
+    const el = imgRef.current;
+    if (el && el.complete && el.naturalWidth > 0) {
       setLoaded(true);
-    };
+    }
+  }, [finalSrc, isSkeleton]);
 
-    preloader.onerror = () => {
-      if (!active) return;
-      setError(true);
-      setLoaded(true);
-      if (onError) onError();
-    };
+  const handleLoad = useCallback(() => {
+    setLoaded(true);
+  }, []);
 
-    return () => {
-      active = false;
-    };
-  }, [src, quality, tileWidth, isSkeleton, onError]);
+  const handleError = useCallback(() => {
+    setError(true);
+    setLoaded(true);
+    if (onError) onError();
+  }, [onError]);
 
   const showSkeleton = isSkeleton || !loaded;
 
@@ -153,6 +143,7 @@ const LazyTileImage: React.FC<LazyTileImageProps> = ({
         style={{
           opacity: showSkeleton ? 1 : 0,
           pointerEvents: 'none',
+          transition: 'opacity 0.3s ease-out',
         }}
         aria-hidden="true"
       >
@@ -178,21 +169,25 @@ const LazyTileImage: React.FC<LazyTileImageProps> = ({
         </span>
       </span>
 
-      {/* ─── Actual Member Photo ─── */}
-      {!isSkeleton && (
+      {/* ─── Actual Member Photo (Live Streaming Image) ─── */}
+      {finalSrc && !isSkeleton && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           ref={imgRef}
+          src={finalSrc}
           alt={alt}
           draggable={false}
+          loading="eager"
           decoding="async"
+          onLoad={handleLoad}
+          onError={handleError}
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'cover',
             display: 'block',
             opacity: loaded && !error ? 1 : 0,
-            transition: 'opacity 0.4s ease-out',
+            transition: 'opacity 0.35s ease-out',
             imageRendering: quality === 'low' ? 'auto' : undefined,
           }}
         />
@@ -651,6 +646,8 @@ export const DriftWall: React.FC<DriftWallProps> = ({
       'data-tile-id': id,
       'data-col': colIndex,
       'data-item-idx': itemIndex,
+      onMouseEnter: () => activate(id, colIndex, item),
+      onMouseLeave: release,
       onFocus: () => activate(id, colIndex, item),
       onBlur: release,
       onClick: (e: React.MouseEvent) => {

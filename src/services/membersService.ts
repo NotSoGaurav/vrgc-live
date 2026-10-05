@@ -63,7 +63,7 @@ export const defaultCouncilMembers: CouncilMember[] = [
     role: "Co-President",
     tier: "EXECUTIVE COUNCIL",
     team: "Leadership",
-    photoUrl: "https://raw.githubusercontent.com/VRGC-vit/VRGCassets/main/leadership/co-presidents/23BCE11158.webp",
+    photoUrl: "https://cdn.jsdelivr.net/gh/VRGC-vit/VRGCassets@main/leadership/co-presidents/23BCE11158.webp",
     bio: "Co-President spearheading varsity tournament operations, live broadcast production, and partner circuits.",
   },
   {
@@ -72,7 +72,7 @@ export const defaultCouncilMembers: CouncilMember[] = [
     role: "Co-President",
     tier: "EXECUTIVE COUNCIL",
     team: "Leadership",
-    photoUrl: "https://raw.githubusercontent.com/VRGC-vit/VRGCassets/main/leadership/co-presidents/23BCG10015.webp",
+    photoUrl: "https://cdn.jsdelivr.net/gh/VRGC-vit/VRGCassets@main/leadership/co-presidents/23BCG10015.webp",
     bio: "Co-President directing game development incubators, technical workshops, and competitive gaming divisions.",
   },
   {
@@ -81,7 +81,7 @@ export const defaultCouncilMembers: CouncilMember[] = [
     role: "Student Coordinator",
     tier: "EXECUTIVE COUNCIL",
     team: "Leadership",
-    photoUrl: "https://raw.githubusercontent.com/VRGC-vit/VRGCassets/main/leadership/coordinators/24BCG10003.webp",
+    photoUrl: "https://cdn.jsdelivr.net/gh/VRGC-vit/VRGCassets@main/leadership/coordinators/24BCG10003.webp",
     bio: "Student Coordinator managing university symposiums, esports player registrations, and club logistics.",
   },
   {
@@ -90,7 +90,7 @@ export const defaultCouncilMembers: CouncilMember[] = [
     role: "Student Coordinator",
     tier: "EXECUTIVE COUNCIL",
     team: "Leadership",
-    photoUrl: "https://raw.githubusercontent.com/VRGC-vit/VRGCassets/main/leadership/coordinators/24BCG10051.webp",
+    photoUrl: "https://cdn.jsdelivr.net/gh/VRGC-vit/VRGCassets@main/leadership/coordinators/24BCG10051.webp",
     bio: "Student Coordinator coordinating varsity scrim schedules, event broadcasts, and member communications.",
   },
 ];
@@ -124,7 +124,7 @@ function cleanTeamName(team?: string): string {
   return trimmed;
 }
 
-const ASSETS_BASE = "https://raw.githubusercontent.com/VRGC-vit/VRGCassets/main";
+const ASSETS_BASE = "https://cdn.jsdelivr.net/gh/VRGC-vit/VRGCassets@main";
 
 /** Build the exact GitHub raw URL matching the reorganized folder structure. */
 function buildPhotoUrl(regNo: string, position: string, team: string): string {

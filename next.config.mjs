@@ -19,6 +19,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'cdn.jsdelivr.net',
+        pathname: '/gh/VRGC-vit/VRGCassets@main/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'picsum.photos',
       },
 
