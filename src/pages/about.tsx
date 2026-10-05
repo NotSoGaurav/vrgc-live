@@ -58,13 +58,15 @@ export default function AboutPage({ initialData }: AboutPageProps) {
 
   const allVerifiedMembers = useMemo(() => {
     if (galleryMembers && galleryMembers.length > 0) {
-      return galleryMembers.map((m: any) => ({
-        id: m.id,
-        image: m.photoUrl,
-        title: m.name,
-        role: `${m.role} • ${m.team}`,
-        data: m,
-      }));
+      return galleryMembers
+        .filter((m: any) => m.photoUrl && m.photoUrl.trim() !== '')
+        .map((m: any) => ({
+          id: m.id,
+          image: m.photoUrl,
+          title: m.name,
+          role: `${m.role} • ${m.team}`,
+          data: m,
+        }));
     }
 
     const all = Object.values(wheelCategories)

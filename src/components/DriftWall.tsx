@@ -298,10 +298,26 @@ export const DriftWall: React.FC<DriftWallProps> = ({
     };
   }, []);
 
+  const [failedIds, setFailedIds] = useState<Set<string>>(new Set());
+
+  const handleTileError = useCallback((id: string) => {
+    setFailedIds((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, []);
+
   const safeItems = useMemo(() => {
-    if (isLoading || !items || items.length === 0) return SKELETON_ITEMS;
-    return items;
-  }, [items, isLoading]);
+    // Show tiles ONLY for items that contain a real, valid photo URL and did not error
+    const photoItems = (items || []).filter(
+      (item) => !item.isSkeleton && item.image && item.image.trim() !== '' && (!item.id || !failedIds.has(item.id))
+    );
+    if (photoItems.length > 0) return photoItems;
+    if (isLoading) return SKELETON_ITEMS;
+    return [];
+  }, [items, isLoading, failedIds]);
 
   // ── Chunk-based column distribution ─────────────────────────────────────────
   // On low-end/mobile we use fewer columns to reduce DOM nodes drastically
@@ -630,6 +646,7 @@ export const DriftWall: React.FC<DriftWallProps> = ({
           quality={netQuality}
           tileWidth={tileWidth}
           isSkeleton={isSkel}
+          onError={() => handleTileError(id)}
         />
         <span className="drift-wall__overlay" aria-hidden="true" style={{ zIndex: 2 }} />
         {item.title && !isSkel && (

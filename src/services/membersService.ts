@@ -126,25 +126,71 @@ function cleanTeamName(team?: string): string {
 
 const ASSETS_BASE = "https://cdn.jsdelivr.net/gh/VRGC-vit/VRGCassets@main";
 
-/** Build the exact GitHub raw URL matching the reorganized folder structure. */
-function buildPhotoUrl(regNo: string, position: string, team: string): string {
-  const cleaned = regNo.trim().toUpperCase();
-  const pos = (position || "").toLowerCase();
-  const teamLower = (team || "").toLowerCase();
+/** All verified member photo paths that physically exist in VRGCassets repo */
+export const VERIFIED_ASSET_PATHS: string[] = [
+  "leadership/co-presidents/23BCE11158.webp",
+  "leadership/co-presidents/23BCG10015.webp",
+  "leadership/coordinators/24BCG10003.webp",
+  "leadership/coordinators/24BCG10051.webp",
+  "members/teams/design/23MIM10104.webp",
+  "members/teams/design/24BCG10009.webp",
+  "members/teams/design/24BCG10082.webp",
+  "members/teams/design/24BSA10144.webp",
+  "members/teams/design/25BCE11169.webp",
+  "members/teams/design/25BCG10018.webp",
+  "members/teams/design/25MIP10089.webp",
+  "members/teams/education/23BCG10089.webp",
+  "members/teams/education/24BCE10241.webp",
+  "members/teams/education/24BCG10096.webp",
+  "members/teams/education/25BCG10002.webp",
+  "members/teams/education/25BCG10003.webp",
+  "members/teams/esports_mobile/24BCG10123.webp",
+  "members/teams/esports_mobile/24BCG10127.webp",
+  "members/teams/esports_mobile/25BAI10379.webp",
+  "members/teams/esports_mobile/25BAI11172.webp",
+  "members/teams/esports_mobile/25BCE10300.webp",
+  "members/teams/esports_pc/24BAI10259.webp",
+  "members/teams/esports_pc/24BCE10375.webp",
+  "members/teams/esports_pc/25BAI11411.webp",
+  "members/teams/esports_pc/25BCE10329.webp",
+  "members/teams/esports_pc/25BCE10483.webp",
+  "members/teams/esports_pc/25BCE11069.webp",
+  "members/teams/esports_pc/25BCG10004.webp",
+  "members/teams/esports_pc/25BCG10022.webp",
+  "members/teams/esports_pc/25BCG10024.webp",
+  "members/teams/esports_pc/25BCG10039.webp",
+  "members/teams/esports_pc/25BOE10149.webp",
+  "members/teams/pr/24BCE11109.webp",
+  "members/teams/pr/24BCG10077.webp",
+  "members/teams/pr/25BCE10933.webp",
+  "members/teams/pr/25BCE11179.webp",
+  "members/teams/pr/25BCG10032.webp",
+  "members/teams/social_media/25BCE10699.webp",
+  "members/teams/social_media/25BCG10035.webp",
+  "members/teams/social_media/25BCG10040.webp",
+  "members/teams/technical/24BSA10096.webp",
+  "members/teams/technical/25BAI10263.webp",
+  "members/teams/technical/25BCG10008.webp",
+  "members/teams/technical/25BCY10254.webp",
+  "members/teams/technical/25BCY10268.webp",
+];
 
-  if (pos.includes("president")) {
-    return `${ASSETS_BASE}/leadership/co-presidents/${cleaned}.webp`;
+export const VERIFIED_PHOTO_MAP = new Map<string, string>(
+  VERIFIED_ASSET_PATHS.map((p) => {
+    const fn = p.split("/").pop() || "";
+    const reg = fn.replace(/\.(webp|jpg|png)$/i, "").toUpperCase();
+    return [reg, p];
+  })
+);
+
+/** Build the exact verified photo URL. Returns empty string if member has no photo in assets. */
+function buildPhotoUrl(regNo: string, position?: string, team?: string): string {
+  const cleaned = regNo.trim().toUpperCase();
+  const verifiedPath = VERIFIED_PHOTO_MAP.get(cleaned);
+  if (!verifiedPath) {
+    return "";
   }
-  if (pos.includes("coordinator") && teamLower.includes("leadership")) {
-    return `${ASSETS_BASE}/leadership/coordinators/${cleaned}.webp`;
-  }
-  if (teamLower.includes("leadership")) {
-    return `${ASSETS_BASE}/leadership/others/${cleaned}.webp`;
-  }
-  if (team) {
-    return `${ASSETS_BASE}/members/teams/${normalizeTeamFolder(team)}/${cleaned}.webp`;
-  }
-  return `${ASSETS_BASE}/members/unknown/${cleaned}.webp`;
+  return `${ASSETS_BASE}/${verifiedPath}`;
 }
 
 /** Normalize an incoming team name to one of our wheel category keys. */
@@ -307,40 +353,43 @@ export async function fetchClubData() {
       });
     });
 
-    // ── Drift Wall gallery: GitHub tree → member details from vrgc-form ──
-    let galleryMembers: any[] = [];
+    // ── Drift Wall gallery: guaranteed photo-only member list ──
+    const assetFilePaths = new Set<string>(VERIFIED_ASSET_PATHS);
     try {
-      const treeRes = await fetch(
-        "https://api.github.com/repos/VRGC-vit/VRGCassets/git/trees/main?recursive=1",
-        { headers: { "User-Agent": "VRGC-NextJS" } }
+      const treeRes = await withTimeout(
+        fetch(
+          "https://api.github.com/repos/VRGC-vit/VRGCassets/git/trees/main?recursive=1",
+          { headers: { "User-Agent": "VRGC-NextJS" } }
+        ),
+        2500
       );
-      if (treeRes.ok) {
+      if (treeRes && treeRes.ok) {
         const treeData = await treeRes.json();
-        const imageFiles = (treeData.tree || []).filter(
-          (f: any) =>
-            !f.path.endsWith("member-data.json") &&
-            (/\.(webp|jpg|png)$/i.test(f.path))
-        );
-
-        galleryMembers = imageFiles.map((file: any) => {
-          const parts = (file.path as string).split("/");
-          const filename = parts[parts.length - 1];
-          const regNo = filename.replace(/\.(webp|jpg|png)$/i, "").toUpperCase();
-          const member = memberByRegNo.get(regNo);
-
-          return {
-            id: regNo,
-            name: member?.name || regNo,
-            role: member?.position || member?.role || "Member",
-            team: cleanTeamName(member?.team),
-            bio: member?.bio || member?.description || "",
-            photoUrl: `${ASSETS_BASE}/${file.path}`,
-          };
+        (treeData.tree || []).forEach((f: any) => {
+          if (!f.path.endsWith("member-data.json") && /\.(webp|jpg|png)$/i.test(f.path)) {
+            assetFilePaths.add(f.path);
+          }
         });
       }
-    } catch (err) {
-      console.error("DriftWall: failed to fetch GitHub tree:", err);
+    } catch (_) {
+      // Fallback silently to VERIFIED_ASSET_PATHS
     }
+
+    const galleryMembers = Array.from(assetFilePaths).map((filePath) => {
+      const parts = filePath.split("/");
+      const filename = parts[parts.length - 1];
+      const regNo = filename.replace(/\.(webp|jpg|png)$/i, "").toUpperCase();
+      const member = memberByRegNo.get(regNo);
+
+      return {
+        id: regNo,
+        name: member?.name || regNo,
+        role: member?.position || member?.role || "Member",
+        team: cleanTeamName(member?.team),
+        bio: member?.bio || member?.description || "",
+        photoUrl: `${ASSETS_BASE}/${filePath}`,
+      };
+    });
 
     return {
       council: council.length > 0 ? council : defaultCouncilMembers,
@@ -350,11 +399,24 @@ export async function fetchClubData() {
     };
   } catch (error) {
     console.error("fetchClubData error:", error);
+    const fallbackGallery = VERIFIED_ASSET_PATHS.map((filePath) => {
+      const parts = filePath.split("/");
+      const filename = parts[parts.length - 1];
+      const regNo = filename.replace(/\.(webp|jpg|png)$/i, "").toUpperCase();
+      return {
+        id: regNo,
+        name: regNo,
+        role: "Member",
+        team: "VRGC",
+        bio: "",
+        photoUrl: `${ASSETS_BASE}/${filePath}`,
+      };
+    });
     return {
       council: defaultCouncilMembers,
       faculty: facultyMembers,
       wheelCategories: {},
-      galleryMembers: [],
+      galleryMembers: fallbackGallery,
     };
   }
 }
