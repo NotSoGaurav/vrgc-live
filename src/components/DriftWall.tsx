@@ -14,10 +14,12 @@ export interface DriftWallItem {
   role?: string;
   href?: string;
   data?: unknown;
+  isSkeleton?: boolean;
 }
 
 export interface DriftWallProps {
   items?: DriftWallItem[];
+  isLoading?: boolean;
   columns?: number;
   tileWidth?: number;
   tileHeight?: number;
@@ -64,15 +66,16 @@ function buildSrc(src: string, quality: NetQuality, tileWidth: number): string {
   return src;
 }
 
-// ─── Default items ─────────────────────────────────────────────────────────────
-const DEFAULT_ITEMS: DriftWallItem[] = Array.from({ length: 15 }, (_, i) => {
-  const ids = [1015, 1025, 1039, 1043, 1044, 1050, 1062, 1069, 1074, 1080, 1084, 106, 110, 133, 164];
-  return {
-    image: `https://picsum.photos/id/${ids[i % ids.length]}/400/270`,
-    title: `Tile ${i + 1}`,
-    href: undefined,
-  };
-});
+// ─── Default & Skeleton items ─────────────────────────────────────────────
+const SKELETON_ITEMS: DriftWallItem[] = Array.from({ length: 24 }, (_, i) => ({
+  id: `dw-skeleton-${i}`,
+  image: '',
+  title: '',
+  role: '',
+  isSkeleton: true,
+}));
+
+const DEFAULT_ITEMS: DriftWallItem[] = SKELETON_ITEMS;
 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -84,107 +87,122 @@ const columnFactor = (index: number, variance: number) => {
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-// ─── Lazy Image with Skeleton ─────────────────────────────────────────────────
+// ─── Lazy Image with Rich Skeleton Placeholder for Bulk Loading ───────────────
 interface LazyTileImageProps {
   src: string;
   alt: string;
   quality: NetQuality;
   tileWidth: number;
+  isSkeleton?: boolean;
   onError?: () => void;
 }
 
-const LazyTileImage: React.FC<LazyTileImageProps> = ({ src, alt, quality, tileWidth, onError }) => {
+const LazyTileImage: React.FC<LazyTileImageProps> = ({
+  src,
+  alt,
+  quality,
+  tileWidth,
+  isSkeleton = false,
+  onError,
+}) => {
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const [revealed, setRevealed] = useState(false);
   const [error, setError] = useState(false);
 
-  // IntersectionObserver — only set `src` when tile enters extended viewport
   useEffect(() => {
-    const el = imgRef.current;
-    if (!el) return;
+    setLoaded(false);
+    setError(false);
 
-    // rootMargin: preload tiles ~300px before they scroll into view
-    const rootMarginVal = quality === 'low' ? '100px' : '300px';
+    if (!src || isSkeleton) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          // Set the real src now
-          const finalSrc = buildSrc(src, quality, tileWidth);
-          el.src = finalSrc;
-          observer.disconnect();
-          setRevealed(true);
-        }
-      },
-      { rootMargin: rootMarginVal, threshold: 0 }
-    );
+    let active = true;
+    const finalSrc = buildSrc(src, quality, tileWidth);
 
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [src, quality, tileWidth]);
+    // Preload image in memory with asynchronous decoding for smooth bulk loading
+    const preloader = new Image();
+    preloader.decoding = 'async';
+    preloader.src = finalSrc;
 
-  const handleLoad = useCallback(() => {
-    setLoaded(true);
-  }, []);
+    preloader.onload = () => {
+      if (!active) return;
+      if (imgRef.current) {
+        imgRef.current.src = finalSrc;
+      }
+      setLoaded(true);
+    };
 
-  const handleError = useCallback(() => {
-    setError(true);
-    setLoaded(true);
-    if (onError) onError();
-  }, [onError]);
+    preloader.onerror = () => {
+      if (!active) return;
+      setError(true);
+      setLoaded(true);
+      if (onError) onError();
+    };
+
+    return () => {
+      active = false;
+    };
+  }, [src, quality, tileWidth, isSkeleton, onError]);
+
+  const showSkeleton = isSkeleton || !loaded;
 
   return (
     <span className="dw-img-wrapper" style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
-      {/* Skeleton shimmer — visible until image loads */}
+      {/* ─── Premium Cyberpunk Skeletal Placeholder ─── */}
       <span
-        className="dw-skeleton"
+        className="dw-skeleton-card"
         style={{
-          position: 'absolute',
-          inset: 0,
-          opacity: loaded ? 0 : 1,
-          transition: 'opacity 0.4s ease',
+          opacity: showSkeleton ? 1 : 0,
           pointerEvents: 'none',
         }}
         aria-hidden="true"
-      />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        ref={imgRef}
-        alt={alt}
-        draggable={false}
-        decoding="async"
-        // No loading="lazy" here — we control it manually via IntersectionObserver
-        // src intentionally left empty; set by observer above
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-          opacity: loaded ? 1 : 0,
-          transition: 'opacity 0.35s ease',
-          // Adaptive quality: downscale rendering on low-end devices
-          imageRendering: quality === 'low' ? 'auto' : undefined,
-        }}
-        onLoad={handleLoad}
-        onError={handleError}
-      />
-      {/* Error fallback */}
-      {error && (
-        <span
+      >
+        <span className="dw-skeleton-shimmer" />
+        <span className="dw-skeleton-avatar">
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </span>
+        <span className="dw-skeleton-lines">
+          <span className="dw-skeleton-line-title" />
+          <span className="dw-skeleton-line-role" />
+        </span>
+      </span>
+
+      {/* ─── Actual Member Photo ─── */}
+      {!isSkeleton && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          ref={imgRef}
+          alt={alt}
+          draggable={false}
+          decoding="async"
           style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'rgba(12, 2, 24, 0.8)',
-            color: '#a855f7',
-            fontSize: '1.5rem',
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            opacity: loaded && !error ? 1 : 0,
+            transition: 'opacity 0.4s ease-out',
+            imageRendering: quality === 'low' ? 'auto' : undefined,
           }}
-          aria-hidden="true"
-        >
-          ◈
+        />
+      )}
+
+      {/* ─── Error Fallback ─── */}
+      {error && !isSkeleton && (
+        <span className="dw-error-fallback" aria-hidden="true">
+          <span style={{ fontSize: '1.4rem' }}>◈</span>
+          <span>VRGC</span>
         </span>
       )}
     </span>
@@ -194,6 +212,7 @@ const LazyTileImage: React.FC<LazyTileImageProps> = ({ src, alt, quality, tileWi
 // ─── Main DriftWall ────────────────────────────────────────────────────────────
 export const DriftWall: React.FC<DriftWallProps> = ({
   items = DEFAULT_ITEMS,
+  isLoading = false,
   columns = 8,
   tileWidth = 220,
   tileHeight = 150,
@@ -285,9 +304,9 @@ export const DriftWall: React.FC<DriftWallProps> = ({
   }, []);
 
   const safeItems = useMemo(() => {
-    if (!items || items.length === 0) return DEFAULT_ITEMS;
+    if (isLoading || !items || items.length === 0) return SKELETON_ITEMS;
     return items;
-  }, [items]);
+  }, [items, isLoading]);
 
   // ── Chunk-based column distribution ─────────────────────────────────────────
   // On low-end/mobile we use fewer columns to reduce DOM nodes drastically
@@ -607,6 +626,7 @@ export const DriftWall: React.FC<DriftWallProps> = ({
 
   // ── Render Tile ────────────────────────────────────────────────────────────
   const renderTile = (item: DriftWallItem, id: string, colIndex: number, itemIndex: number) => {
+    const isSkel = Boolean(item.isSkeleton);
     const inner = (
       <span className="drift-wall__inner">
         <LazyTileImage
@@ -614,9 +634,10 @@ export const DriftWall: React.FC<DriftWallProps> = ({
           alt={item.title ?? ''}
           quality={netQuality}
           tileWidth={tileWidth}
+          isSkeleton={isSkel}
         />
         <span className="drift-wall__overlay" aria-hidden="true" style={{ zIndex: 2 }} />
-        {item.title && (
+        {item.title && !isSkel && (
           <div className="drift-wall__tile-info" style={{ zIndex: 3 }}>
             <div className="drift-wall__tile-name">{item.title}</div>
             {item.role && <div className="drift-wall__tile-role">{item.role}</div>}

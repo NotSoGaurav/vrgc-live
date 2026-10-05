@@ -34,11 +34,19 @@ const assetsDir = path.resolve("d:/ProjectsCS/vrgc-assets");
 // Normalize team name to a consistent folder name
 function normalizeTeam(team) {
   if (!team) return "unknown";
-  return team
-    .trim()
-    .toLowerCase()
+  const lower = team.trim().toLowerCase();
+  if (lower.includes("tech")) return "technical";
+  return lower
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_|_$/g, "");
+}
+
+// Clean display team name
+function cleanTeamName(team) {
+  if (!team) return "";
+  const trimmed = team.trim();
+  if (/^technical(\s+team)?$/i.test(trimmed)) return "Technical";
+  return trimmed;
 }
 
 // Recursive file finder
@@ -69,7 +77,7 @@ async function main() {
       id: regNo,
       name: d.name || "",
       position: (d.position || d.role || "Member").trim(),
-      team: (d.team || "").trim(),
+      team: cleanTeamName(d.team),
     };
   });
   console.log(`✅ Loaded ${Object.keys(memberMap).length} members.\n`);

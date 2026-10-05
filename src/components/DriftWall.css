@@ -105,7 +105,128 @@
   position: relative;
 }
 
-/* ─── Skeleton Shimmer ───────────────────────────────────────────────────────── */
+/* ─── Skeleton Shimmer & Bulk Loading Placeholders ───────────────────────────── */
+.dw-skeleton-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 36%, #1c0636 0%, #0c0217 85%);
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.dw-skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(168, 85, 247, 0.03) 25%,
+    rgba(216, 180, 254, 0.22) 50%,
+    rgba(168, 85, 247, 0.03) 75%,
+    transparent 100%
+  );
+  background-size: 250% 100%;
+  animation: dw-skeleton-sweep 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes dw-skeleton-sweep {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -150% 0;
+  }
+}
+
+.dw-skeleton-avatar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(192, 132, 252, 0.55);
+  margin-top: -0.5rem;
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.15);
+  animation: dw-avatar-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes dw-avatar-pulse {
+  0%, 100% {
+    transform: scale(0.96);
+    opacity: 0.7;
+    border-color: rgba(168, 85, 247, 0.25);
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+    border-color: rgba(168, 85, 247, 0.6);
+    box-shadow: 0 0 25px rgba(168, 85, 247, 0.35);
+  }
+}
+
+.dw-skeleton-lines {
+  position: absolute;
+  bottom: 0.85rem;
+  left: 0.85rem;
+  right: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dw-skeleton-line-title {
+  height: 8px;
+  width: 58%;
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.25);
+  animation: dw-pulse 1.8s ease-in-out infinite;
+}
+
+.dw-skeleton-line-role {
+  height: 6px;
+  width: 36%;
+  border-radius: 3px;
+  background: rgba(139, 92, 246, 0.16);
+  animation: dw-pulse 1.8s ease-in-out infinite 0.25s;
+}
+
+@keyframes dw-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.dw-error-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 50%, #1a0633 0%, #0c0217 100%);
+  color: #c084fc;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .dw-skeleton {
   position: absolute;
   inset: 0;
@@ -130,9 +251,15 @@
 
 /* On reduced motion — static purple placeholder instead of animating shimmer */
 @media (prefers-reduced-motion: reduce) {
+  .dw-skeleton-shimmer,
   .dw-skeleton {
     animation: none;
     background: rgba(26, 6, 51, 0.9);
+  }
+  .dw-skeleton-avatar,
+  .dw-skeleton-line-title,
+  .dw-skeleton-line-role {
+    animation: none;
   }
 }
 

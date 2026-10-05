@@ -528,6 +528,7 @@ export default function AboutPage({ initialData }: AboutPageProps) {
 
           <DriftWall
             items={allVerifiedMembers}
+            isLoading={isLoading || allVerifiedMembers.length === 0}
             columns={8}
             tileWidth={220}
             tileHeight={150}

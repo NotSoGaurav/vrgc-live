@@ -110,11 +110,18 @@ function withTimeout<T>(promise: PromiseLike<T>, ms = 6000): Promise<T | null> {
  *   team.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "")
  */
 function normalizeTeamFolder(team: string): string {
-  return team
-    .trim()
-    .toLowerCase()
+  const t = team.trim().toLowerCase();
+  if (t.includes("tech")) return "technical";
+  return t
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_|_$/, "");
+}
+
+function cleanTeamName(team?: string): string {
+  if (!team) return "VRGC";
+  const trimmed = team.trim();
+  if (/^technical(\s+team)?$/i.test(trimmed)) return "Technical";
+  return trimmed;
 }
 
 const ASSETS_BASE = "https://raw.githubusercontent.com/VRGC-vit/VRGCassets/main";
@@ -325,7 +332,7 @@ export async function fetchClubData() {
             id: regNo,
             name: member?.name || regNo,
             role: member?.position || member?.role || "Member",
-            team: member?.team || "VRGC",
+            team: cleanTeamName(member?.team),
             bio: member?.bio || member?.description || "",
             photoUrl: `${ASSETS_BASE}/${file.path}`,
           };
