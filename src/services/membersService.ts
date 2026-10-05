@@ -55,6 +55,10 @@ export const facultyMembers: FacultyMember[] = [
   },
 ];
 
+// ── Base path for hosted assets (defaults to local /assets) ────────
+export const ASSETS_BASE =
+  process.env.NEXT_PUBLIC_ASSETS_BASE_URL || "/assets";
+
 // ── Fallback Council (shown while Firestore loads) ────────────────
 export const defaultCouncilMembers: CouncilMember[] = [
   {
@@ -63,7 +67,7 @@ export const defaultCouncilMembers: CouncilMember[] = [
     role: "Co-President",
     tier: "EXECUTIVE COUNCIL",
     team: "Leadership",
-    photoUrl: "https://cdn.jsdelivr.net/gh/VRGC-vit/VRGCassets@main/leadership/co-presidents/23BCE11158.webp",
+    photoUrl: `${ASSETS_BASE}/leadership/co-presidents/23BCE11158.webp`,
     bio: "Co-President spearheading varsity tournament operations, live broadcast production, and partner circuits.",
   },
   {
@@ -72,7 +76,7 @@ export const defaultCouncilMembers: CouncilMember[] = [
     role: "Co-President",
     tier: "EXECUTIVE COUNCIL",
     team: "Leadership",
-    photoUrl: "https://cdn.jsdelivr.net/gh/VRGC-vit/VRGCassets@main/leadership/co-presidents/23BCG10015.webp",
+    photoUrl: `${ASSETS_BASE}/leadership/co-presidents/23BCG10015.webp`,
     bio: "Co-President directing game development incubators, technical workshops, and competitive gaming divisions.",
   },
   {
@@ -81,7 +85,7 @@ export const defaultCouncilMembers: CouncilMember[] = [
     role: "Student Coordinator",
     tier: "EXECUTIVE COUNCIL",
     team: "Leadership",
-    photoUrl: "https://cdn.jsdelivr.net/gh/VRGC-vit/VRGCassets@main/leadership/coordinators/24BCG10003.webp",
+    photoUrl: `${ASSETS_BASE}/leadership/coordinators/24BCG10003.webp`,
     bio: "Student Coordinator managing university symposiums, esports player registrations, and club logistics.",
   },
   {
@@ -90,7 +94,7 @@ export const defaultCouncilMembers: CouncilMember[] = [
     role: "Student Coordinator",
     tier: "EXECUTIVE COUNCIL",
     team: "Leadership",
-    photoUrl: "https://cdn.jsdelivr.net/gh/VRGC-vit/VRGCassets@main/leadership/coordinators/24BCG10051.webp",
+    photoUrl: `${ASSETS_BASE}/leadership/coordinators/24BCG10051.webp`,
     bio: "Student Coordinator coordinating varsity scrim schedules, event broadcasts, and member communications.",
   },
 ];
@@ -124,9 +128,6 @@ function cleanTeamName(team?: string): string {
   return trimmed;
 }
 
-const ASSETS_BASE =
-  process.env.NEXT_PUBLIC_GITHUB_ASSETS_BASE_URL ||
-  "https://cdn.jsdelivr.net/gh/VRGC-vit/VRGCassets@main";
 
 /** Build the dynamically constructed photo URL. Returns fallback .webp path */
 function buildPhotoUrl(regNo: string, position?: string, team?: string): string {
@@ -318,43 +319,34 @@ export async function fetchClubData() {
       });
     });
 
-    // ── Drift Wall gallery: strict verification against Git repository assets ──
+    // ── Drift Wall gallery: load registration numbers from local / hosted assets ──
     const assetFilePaths = new Set<string>();
-    const githubApiUrl =
-      process.env.NEXT_PUBLIC_GITHUB_API_URL ||
-      process.env.GITHUB_API_URL ||
-      "https://api.github.com/repos/VRGC-vit/VRGCassets/git/trees/main?recursive=1";
-    const githubManifestUrl =
-      process.env.NEXT_PUBLIC_GITHUB_MANIFEST_URL ||
-      `${ASSETS_BASE}/manifest.json`;
-    const githubToken = process.env.GITHUB_TOKEN || process.env.NEXT_PUBLIC_GITHUB_TOKEN;
 
-    // 1. Query GitHub Trees API from environment variable
-    try {
-      const headers: Record<string, string> = { "User-Agent": "VRGC-NextJS" };
-      if (githubToken) {
-        headers["Authorization"] = `Bearer ${githubToken}`;
-      }
-      const treeRes = await withTimeout(
-        fetch(githubApiUrl, { headers }),
-        2500
-      );
-      if (treeRes && treeRes.ok) {
-        const treeData = await treeRes.json();
-        (treeData.tree || []).forEach((f: any) => {
-          if (!f.path.endsWith("member-data.json") && /\.(webp|jpg|png)$/i.test(f.path)) {
-            assetFilePaths.add(f.path.trim());
+    // 1. Read directly from local filesystem in server environments
+    if (typeof window === "undefined") {
+      try {
+        const fs = await import("fs");
+        const path = await import("path");
+        const manifestPaths = [
+          path.join(process.cwd(), "public", "assets", "manifest.json"),
+          path.join(process.cwd(), "public", "manifest-assets.json"),
+        ];
+        for (const mp of manifestPaths) {
+          if (fs.existsSync(mp)) {
+            const parsed = JSON.parse(fs.readFileSync(mp, "utf-8"));
+            (parsed.files || []).forEach((p: string) => assetFilePaths.add(p.trim()));
+            if (assetFilePaths.size > 0) break;
           }
-        });
-      }
-    } catch (_) {
-      // API rate limit or network issue; safely falls back to Git repo manifest
+        }
+      } catch (_) {}
     }
 
-    // 2. If GitHub Trees API was rate-limited, query Git repository manifest directly
+    // 2. Fetch from local asset manifest via HTTP/fetch
     if (assetFilePaths.size === 0) {
       try {
-        const manifestRes = await withTimeout(fetch(githubManifestUrl), 2500);
+        const manifestUrl =
+          process.env.NEXT_PUBLIC_GITHUB_MANIFEST_URL || `${ASSETS_BASE}/manifest.json`;
+        const manifestRes = await withTimeout(fetch(manifestUrl), 2000);
         if (manifestRes && manifestRes.ok) {
           const manifestData = await manifestRes.json();
           (manifestData.files || []).forEach((p: string) => {
@@ -366,15 +358,24 @@ export async function fetchClubData() {
       } catch (_) {}
     }
 
-    // 3. Server-side local manifest fallback if offline
-    if (assetFilePaths.size === 0 && typeof window === "undefined") {
+    // 3. Optional fallback to GitHub Trees API only if configured in environment
+    if (assetFilePaths.size === 0 && process.env.NEXT_PUBLIC_GITHUB_API_URL) {
       try {
-        const fs = await import("fs");
-        const path = await import("path");
-        const localPath = path.join(process.cwd(), "public", "manifest-assets.json");
-        if (fs.existsSync(localPath)) {
-          const parsed = JSON.parse(fs.readFileSync(localPath, "utf-8"));
-          (parsed.files || []).forEach((p: string) => assetFilePaths.add(p.trim()));
+        const headers: Record<string, string> = { "User-Agent": "VRGC-NextJS" };
+        if (process.env.GITHUB_TOKEN) {
+          headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
+        }
+        const treeRes = await withTimeout(
+          fetch(process.env.NEXT_PUBLIC_GITHUB_API_URL, { headers }),
+          2500
+        );
+        if (treeRes && treeRes.ok) {
+          const treeData = await treeRes.json();
+          (treeData.tree || []).forEach((f: any) => {
+            if (!f.path.endsWith("member-data.json") && /\.(webp|jpg|png)$/i.test(f.path)) {
+              assetFilePaths.add(f.path.trim());
+            }
+          });
         }
       } catch (_) {}
     }
