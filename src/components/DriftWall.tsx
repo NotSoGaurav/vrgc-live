@@ -113,6 +113,7 @@ const LazyTileImage: React.FC<LazyTileImageProps> = ({
 
   // Synchronous cache detection: if the browser already cached it, show immediately
   useIsomorphicLayoutEffect(() => {
+    setError(false);
     if (!finalSrc || isSkeleton) {
       setLoaded(false);
       return;
@@ -133,7 +134,7 @@ const LazyTileImage: React.FC<LazyTileImageProps> = ({
     if (onError) onError();
   }, [onError]);
 
-  const showSkeleton = isSkeleton || !loaded;
+  const showSkeleton = isSkeleton || (!loaded && !error);
 
   return (
     <span className="dw-img-wrapper" style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
@@ -141,7 +142,7 @@ const LazyTileImage: React.FC<LazyTileImageProps> = ({
       <span
         className="dw-skeleton-card"
         style={{
-          opacity: showSkeleton ? 1 : 0,
+          opacity: showSkeleton && !error ? 1 : 0,
           pointerEvents: 'none',
           transition: 'opacity 0.3s ease-out',
         }}
@@ -193,13 +194,6 @@ const LazyTileImage: React.FC<LazyTileImageProps> = ({
         />
       )}
 
-      {/* ─── Error Fallback ─── */}
-      {error && !isSkeleton && (
-        <span className="dw-error-fallback" aria-hidden="true">
-          <span style={{ fontSize: '1.4rem' }}>◈</span>
-          <span>VRGC</span>
-        </span>
-      )}
     </span>
   );
 };
@@ -310,7 +304,7 @@ export const DriftWall: React.FC<DriftWallProps> = ({
   }, []);
 
   const safeItems = useMemo(() => {
-    // Show tiles ONLY for items that contain a real, valid photo URL and did not error
+    // Show tiles ONLY for items that contain a real, valid photo URL and did not fail to load
     const photoItems = (items || []).filter(
       (item) => !item.isSkeleton && item.image && item.image.trim() !== '' && (!item.id || !failedIds.has(item.id))
     );
@@ -646,7 +640,7 @@ export const DriftWall: React.FC<DriftWallProps> = ({
           quality={netQuality}
           tileWidth={tileWidth}
           isSkeleton={isSkel}
-          onError={() => handleTileError(id)}
+          onError={() => handleTileError(item.id || id)}
         />
         <span className="drift-wall__overlay" aria-hidden="true" style={{ zIndex: 2 }} />
         {item.title && !isSkel && (
@@ -733,7 +727,7 @@ export const DriftWall: React.FC<DriftWallProps> = ({
               >
                 {copies.map((_, copyIndex) =>
                   col.map((item, itemIndex) =>
-                    renderTile(item, `${c}-${copyIndex}-${itemIndex}`, c, itemIndex)
+                    renderTile(item, `${c}-${copyIndex}-${item.id || itemIndex}`, c, itemIndex)
                   )
                 )}
               </div>

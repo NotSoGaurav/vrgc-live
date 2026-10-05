@@ -57,6 +57,7 @@ export default function AboutPage({ initialData }: AboutPageProps) {
   }, [initialData]);
 
   const allVerifiedMembers = useMemo(() => {
+    // Only create tiles for members strictly verified to have photo data in the Git repository
     if (galleryMembers && galleryMembers.length > 0) {
       return galleryMembers
         .filter((m: any) => m.photoUrl && m.photoUrl.trim() !== '')
@@ -68,51 +69,8 @@ export default function AboutPage({ initialData }: AboutPageProps) {
           data: m,
         }));
     }
-
-    const all = Object.values(wheelCategories)
-      .flat()
-      .map((m) => ({
-        id: m.id,
-        name: m.name,
-        role: `${m.role} • ${m.team}`,
-        photoUrl: m.photoUrl,
-        position: m.role,
-        team: m.team,
-      }));
-
-    const councilIds = new Set(
-      council.map((c) => (c.id || c.name || '').toLowerCase().replace(/[^a-z0-9]/g, ''))
-    );
-
-    const uniqueMap = new Map<string, { id: string; name: string; role: string; photoUrl: string }>();
-    all.forEach((m) => {
-      const lowerRole = (m.position || m.role || '').toLowerCase();
-      const lowerTeam = (m.team || '').toLowerCase();
-      const key = (m.id || m.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-
-      if (councilIds.has(key)) return;
-      if (
-        lowerTeam.includes('leadership') ||
-        lowerRole.includes('president') ||
-        lowerRole.includes('executive')
-      )
-        return;
-
-      if (!uniqueMap.has(key)) {
-        uniqueMap.set(key, m);
-      }
-    });
-
-    return Array.from(uniqueMap.values())
-      .filter((m) => m.photoUrl && !m.photoUrl.includes('vrgc_logo'))
-      .map((m) => ({
-        id: m.id,
-        image: m.photoUrl,
-        title: m.name,
-        role: m.role,
-        data: m,
-      }));
-  }, [wheelCategories, council, galleryMembers]);
+    return [];
+  }, [galleryMembers]);
 
   return (
     <>
