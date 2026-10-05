@@ -1,3 +1,5 @@
+/* ─── DriftWall – Performance-optimised styles ─────────────────────────────── */
+
 .drift-wall {
   position: relative;
   width: 100%;
@@ -16,7 +18,9 @@
   --dw-dim: 0.68;
   --dw-gray: 0;
   --dw-overlay: #060010;
-  contain: layout paint;
+  /* Isolate the entire wall from page repaints */
+  contain: layout paint style;
+  isolation: isolate;
 }
 
 .drift-wall.is-dragging,
@@ -24,7 +28,7 @@
   cursor: grabbing !important;
 }
 
-/* High-performance vignette overlay without expensive mask-composite */
+/* High-performance vignette overlay */
 .drift-wall::after {
   content: '';
   position: absolute;
@@ -52,6 +56,12 @@
   width: calc(var(--dw-tile-w) + var(--dw-gap));
   transform-style: preserve-3d;
   flex-shrink: 0;
+  transition: z-index 0.2s;
+}
+
+.drift-wall__col:has(.drift-wall__tile:hover),
+.drift-wall__col:has(.drift-wall__tile.is-active) {
+  z-index: 50;
 }
 
 .drift-wall__track {
@@ -69,6 +79,18 @@
   flex: 0 0 auto;
   outline: none;
   transform-style: preserve-3d;
+  /* Allow lifted tile to render completely outside bounds without cutting off */
+  overflow: visible;
+  content-visibility: auto;
+  contain-intrinsic-size: auto calc(var(--dw-tile-h) + var(--dw-gap));
+  transition: z-index 0.2s;
+}
+
+.drift-wall__tile:hover,
+.drift-wall__tile.is-active,
+.drift-wall__tile:focus-visible {
+  content-visibility: visible;
+  z-index: 60;
 }
 
 .drift-wall__inner {
@@ -80,15 +102,183 @@
   background: radial-gradient(circle at 50% 50%, #1a0633 0%, #0c0217 100%);
   border: 1px solid rgba(139, 92, 246, 0.28);
   opacity: var(--dw-dim);
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
   pointer-events: none;
   transition:
-    transform 0.35s cubic-bezier(0.2, 0.9, 0.36, 1),
-    opacity 0.35s ease,
-    box-shadow 0.35s ease,
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.3s ease,
+    box-shadow 0.38s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.25s ease;
+  will-change: transform, opacity;
 }
 
+/* ─── Lazy Image Wrapper ─────────────────────────────────────────────────────── */
+.dw-img-wrapper {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* ─── Skeleton Shimmer & Bulk Loading Placeholders ───────────────────────────── */
+.dw-skeleton-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 36%, #1c0636 0%, #0c0217 85%);
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: none;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.dw-skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(168, 85, 247, 0.03) 25%,
+    rgba(216, 180, 254, 0.22) 50%,
+    rgba(168, 85, 247, 0.03) 75%,
+    transparent 100%
+  );
+  background-size: 250% 100%;
+  animation: dw-skeleton-sweep 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes dw-skeleton-sweep {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -150% 0;
+  }
+}
+
+.dw-skeleton-avatar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(192, 132, 252, 0.55);
+  margin-top: -0.5rem;
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.15);
+  animation: dw-avatar-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes dw-avatar-pulse {
+  0%, 100% {
+    transform: scale(0.96);
+    opacity: 0.7;
+    border-color: rgba(168, 85, 247, 0.25);
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+    border-color: rgba(168, 85, 247, 0.6);
+    box-shadow: 0 0 25px rgba(168, 85, 247, 0.35);
+  }
+}
+
+.dw-skeleton-lines {
+  position: absolute;
+  bottom: 0.85rem;
+  left: 0.85rem;
+  right: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.dw-skeleton-line-title {
+  height: 8px;
+  width: 58%;
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.25);
+  animation: dw-pulse 1.8s ease-in-out infinite;
+}
+
+.dw-skeleton-line-role {
+  height: 6px;
+  width: 36%;
+  border-radius: 3px;
+  background: rgba(139, 92, 246, 0.16);
+  animation: dw-pulse 1.8s ease-in-out infinite 0.25s;
+}
+
+@keyframes dw-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.dw-error-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 50%, #1a0633 0%, #0c0217 100%);
+  color: #c084fc;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dw-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(26, 6, 51, 0.9) 0%,
+    rgba(50, 15, 90, 0.95) 40%,
+    rgba(80, 20, 130, 0.85) 50%,
+    rgba(50, 15, 90, 0.95) 60%,
+    rgba(26, 6, 51, 0.9) 100%
+  );
+  background-size: 200% 100%;
+  animation: dw-shimmer 1.8s ease-in-out infinite;
+  border-radius: inherit;
+  will-change: background-position;
+}
+
+@keyframes dw-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* On reduced motion — static purple placeholder instead of animating shimmer */
+@media (prefers-reduced-motion: reduce) {
+  .dw-skeleton-shimmer,
+  .dw-skeleton {
+    animation: none;
+    background: rgba(26, 6, 51, 0.9);
+  }
+  .dw-skeleton-avatar,
+  .dw-skeleton-line-title,
+  .dw-skeleton-line-role {
+    animation: none;
+  }
+}
+
+/* ─── Image styles ───────────────────────────────────────────────────────────── */
 .drift-wall__tile img {
   width: 100%;
   height: 100%;
@@ -99,8 +289,11 @@
   user-select: none;
   -webkit-user-drag: none;
   background: #110220;
+  /* Promote to composite layer so GPU handles the fade */
+  will-change: opacity;
 }
 
+/* ─── Overlay ────────────────────────────────────────────────────────────────── */
 .drift-wall__overlay {
   position: absolute;
   inset: 0;
@@ -110,7 +303,7 @@
   transition: opacity 0.35s ease;
 }
 
-/* Hidden by default on non-hover mode */
+/* ─── Tile info ──────────────────────────────────────────────────────────────── */
 .drift-wall__tile-info {
   position: absolute;
   bottom: 0;
@@ -147,14 +340,18 @@
   text-overflow: ellipsis;
 }
 
-/* Show name and role ONLY when hovered / active */
+/* ─── Active / Hover states: gentle upward lift & elevation without cutting off ─────── */
 .drift-wall__tile.is-active .drift-wall__inner,
 .drift-wall__tile:hover .drift-wall__inner,
 .drift-wall__tile:focus-visible .drift-wall__inner {
   opacity: 1;
-  transform: translateZ(var(--dw-lift));
-  border-color: #a855f7;
-  box-shadow: 0 20px 50px -15px rgba(124, 58, 237, 0.8), 0 0 25px rgba(168, 85, 247, 0.45);
+  /* Slightly lift up vertically (translateY) and in depth (translateZ) with subtle scale */
+  transform: translate3d(0, -9px, 45px) scale(1.04);
+  border-color: #c084fc;
+  box-shadow:
+    0 24px 50px -12px rgba(124, 58, 237, 0.75),
+    0 0 28px rgba(168, 85, 247, 0.5),
+    inset 0 0 15px rgba(168, 85, 247, 0.15);
 }
 
 .drift-wall__tile.is-active img,
@@ -176,9 +373,19 @@
   transform: translateY(0);
 }
 
+/* ─── Reduced motion ─────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .drift-wall__plane,
   .drift-wall__track {
     will-change: auto;
   }
+}
+
+/* ─── Low-quality network: disable heavy transitions ─────────────────────────── */
+.drift-wall--q-low .drift-wall__inner {
+  transition: opacity 0.1s ease;
+}
+
+.drift-wall--q-low .dw-skeleton {
+  animation-duration: 2.4s;
 }

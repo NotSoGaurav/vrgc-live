@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tournament Fixture Generator — VRGC Organizer Tools</title>
+  <meta name="description"
+    content="Generate tournament brackets, round-robin schedules, and BGMI/Free Fire points-table fixtures in seconds. VRGC official organizer tool.">
+  <meta name="theme-color" content="#080010">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="fixture-generator.css">
+</head>
+
+<body>
+  <!-- NAV -->
+  <header class="ink-nav scrolled" id="ink-navbar">
+    <div class="nav-brand-wrap">
+      <a href="/" style="display:flex;align-items:center;gap:0.75rem">
+        <img src="vrgc_logo.jpg" alt="VRGC Logo" class="nav-brand-logo">
+        <span class="nav-brand-text">VRGC</span>
+      </a>
+    </div>
+    <button class="nav-mobile-toggle" id="mobileToggle" aria-label="Toggle menu"
+      style="min-height:44px;min-width:44px;">
+      <span class="nmt-bar"></span><span class="nmt-bar"></span><span class="nmt-bar"></span>
+    </button>
+    <nav class="ink-nav-links" id="navLinks">
+      <a href="/" class="ink-nl">Home</a>
+      <a href="/about" class="ink-nl">Studio</a>
+      <a href="/events" class="ink-nl">Events</a>
+      <a href="/live" class="ink-nl">Live</a>
+      <a href="/community" class="ink-nl">Community</a>
+      <a href="/tools" class="ink-nl active">Tools</a>
+    </nav>
+    <div class="ink-nav-actions">
+      <a href="/events" class="btn-login" style="min-height:44px;display:inline-flex;align-items:center;">Events</a>
+      <a href="/events#register" class="btn-signup" style="min-height:44px;display:inline-flex;align-items:center;">Join
+        Club</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="fg-hero">
+      <div class="fg-hero-glow"></div>
+      <div class="fg-hero-content">
+        <div class="fg-tool-badge">
+          <span class="fg-tool-badge-dot"></span>
+          VRGC Organizer Suite &bull; Official Tool
+        </div>
+        <h1 class="fg-hero-title">
+          FIXTURE
+          <span>GENERATOR</span>
+        </h1>
+        <p class="fg-hero-sub">
+          Build complete tournament brackets, round-robin schedules, and Battle Royale points-table fixtures in minutes.
+          Export shareable posters, track live results &amp; standings.
+        </p>
+        <div class="fg-steps-wrap">
+          <div class="fg-steps" id="stepsIndicator">
+            <div class="fg-step-item active" id="step-item-1">
+              <div class="fg-step-node"><span class="fg-step-num">1</span></div>
+              <div class="fg-step-label">Game Type</div>
+            </div>
+            <div class="fg-step-connector" id="conn-1-2"></div>
+            <div class="fg-step-item" id="step-item-2">
+              <div class="fg-step-node"><span class="fg-step-num">2</span></div>
+              <div class="fg-step-label">Rules</div>
+            </div>
+            <div class="fg-step-connector" id="conn-2-3"></div>
+            <div class="fg-step-item" id="step-item-3">
+              <div class="fg-step-node"><span class="fg-step-num">3</span></div>
+              <div class="fg-step-label">Teams</div>
+            </div>
+            <div class="fg-step-connector" id="conn-3-4"></div>
+            <div class="fg-step-item" id="step-item-4">
+              <div class="fg-step-node"><span class="fg-step-num">4</span></div>
+              <div class="fg-step-label">Fixture &amp; Poster</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WIZARD -->
+    <section class="fg-main">
+
+      <!-- STEP 1: GAME TYPE -->
+      <div class="fg-panel active" id="panel-step-1">
+        <div class="fg-section-header">
+          <div class="fg-section-tag">Step 1 of 4</div>
+          <h2 class="fg-section-title">SELECT <span>GAME FORMAT</span></h2>
+          <p class="fg-section-sub">Different games use fundamentally different tournament structures. Pick the format
+            that matches your game.</p>
+        </div>
+        <div class="fg-game-grid">
+          <div class="fg-game-card" id="card-bracket" onclick="selectGameType('bracket')">
+            <div class="fg-game-card-check" id="check-bracket">&#10003;</div>
+            <span class="fg-game-icon">&#127919;</span>
+            <div class="fg-game-tag">Bracket Format</div>
+            <h3 class="fg-game-title">Valorant &amp; CS2 Style</h3>
+            <p class="fg-game-desc">Head-to-head elimination brackets. Teams compete in direct matches until one
+              champion remains. Auto bye management for any team count.</p>
+            <div class="fg-game-features">
+              <div class="fg-game-feature"><span class="fg-game-feature-dot"></span>Single elimination, double
+                elimination, or round robin</div>
+              <div class="fg-game-feature"><span class="fg-game-feature-dot"></span>Bo1 / Bo3 / Bo5 per round &mdash;
+                configurable</div>
+              <div class="fg-game-feature"><span class="fg-game-feature-dot"></span>Auto bye placement with manual or
+                random seeding</div>
+              <div class="fg-game-feature"><span class="fg-game-feature-dot"></span>LAN or Online mode toggle</div>
+            </div>
+          </div>
+          <div class="fg-game-card" id="card-points" onclick="selectGameType('points')">
+            <div class="fg-game-card-check" id="check-points">&#10003;</div>
+            <span class="fg-game-icon">&#128299;</span>
+            <div class="fg-game-tag">Points Table Format</div>
+            <h3 class="fg-game-title">BGMI &amp; Free Fire Style</h3>
+            <p class="fg-game-desc">All squads play every match. Final standings are calculated from cumulative
+              placement points and kill points across all rounds.</p>
+            <div class="fg-game-features">
+              <div class="fg-game-feature"><span class="fg-game-feature-dot"></span>Fully editable placement points
+                table per rank</div>
+              <div class="fg-game-feature"><span class="fg-game-feature-dot"></span>Custom kill points + per-match kill
+                cap</div>
+              <div class="fg-game-feature"><span class="fg-game-feature-dot"></span>WWCD (Winner Winner Chicken Dinner)
+                bonus toggle</div>
+              <div class="fg-game-feature"><span class="fg-game-feature-dot"></span>Multi-match cycle schedule across
+                all squads</div>
+            </div>
+          </div>
+        </div>
+        <div class="fg-nav-row">
+          <button class="fg-back-btn" disabled>&#8592; Back</button>
+          <button class="fg-next-btn" id="step1-next" onclick="goToStep(2)" disabled>Continue &rarr; Setup
+            Rules</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: RULES -->
+      <div class="fg-panel" id="panel-step-2">
+        <div class="fg-section-header">
+          <div class="fg-section-tag" id="step2-tag">Step 2 of 4</div>
+          <h2 class="fg-section-title" id="step2-title">TOURNAMENT <span>RULES</span></h2>
+          <p class="fg-section-sub" id="step2-sub">Configure tournament parameters. Settings automatically adapt to your
+            chosen format.</p>
+        </div>
+
+        <!-- BRACKET RULES -->
+        <div class="fg-rules-panel" id="rules-bracket">
+          <div class="fg-rule-section">
+            <div class="fg-rule-section-title">Basic Information</div>
+            <div class="fg-form-grid">
+              <div class="fg-field fg-field-full">
+                <label class="fg-label" for="bracket-name">Tournament Name</label>
+                <input class="fg-input" id="bracket-name" type="text" placeholder="e.g. VRGC VALORANT CAMPUS CUP S4"
+                  autocomplete="off">
+              </div>
+              <div class="fg-field">
+                <label class="fg-label" for="bracket-game-title">Game Title</label>
+                <select class="fg-select" id="bracket-game-title">
+                  <option value="valorant">VALORANT</option>
+                  <option value="cs2">CS2</option>
+                  <option value="apex">Apex Legends</option>
+                  <option value="rl">Rocket League</option>
+                  <option value="other">Other / Custom</option>
+                </select>
+              </div>
+              <div class="fg-field">
+                <label class="fg-label">Venue Type</label>
+                <div class="fg-toggle-group" id="venue-toggle">
+                  <button class="fg-toggle-btn active" onclick="setToggle(this,'venue-toggle')">&#128187;
+                    Online</button>
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'venue-toggle')">&#127967; LAN</button>
+                </div>
+              </div>
+              <div class="fg-field">
+                <label class="fg-label" for="bracket-date">Tournament Date</label>
+                <input class="fg-input" id="bracket-date" type="date" style="color-scheme:dark;">
+              </div>
+              <div class="fg-field">
+                <label class="fg-label" for="bracket-prize">Prize Pool</label>
+                <input class="fg-input" id="bracket-prize" type="text" placeholder="e.g. &#8377;1,50,000"
+                  autocomplete="off">
+              </div>
+              <div class="fg-field">
+                <label class="fg-label" for="bracket-organizer">Organizer Name</label>
+                <input class="fg-input" id="bracket-organizer" type="text" placeholder="e.g. VRGC Events Team"
+                  autocomplete="off">
+              </div>
+            </div>
+          </div>
+          <div class="fg-rule-section">
+            <div class="fg-rule-section-title">Tournament Format</div>
+            <div class="fg-form-grid">
+              <div class="fg-field">
+                <label class="fg-label">Elimination Format</label>
+                <div class="fg-toggle-group" id="bracket-format-toggle">
+                  <button class="fg-toggle-btn active" onclick="setToggle(this,'bracket-format-toggle')">Single</button>
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'bracket-format-toggle')">Double</button>
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'bracket-format-toggle')">Round Robin</button>
+                </div>
+              </div>
+              <div class="fg-field">
+                <label class="fg-label">Best-Of Per Match</label>
+                <div class="fg-toggle-group" id="bestof-toggle">
+                  <button class="fg-toggle-btn active" onclick="setToggle(this,'bestof-toggle')">Bo1</button>
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'bestof-toggle')">Bo3</button>
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'bestof-toggle')">Bo5</button>
+                </div>
+                <div class="fg-hint">Per-round format configurable after generation</div>
+              </div>
+              <div class="fg-field">
+                <label class="fg-label">Number of Teams <span class="fg-tooltip-wrap"><span
+                      class="fg-tooltip-icon">?</span><span class="fg-tooltip-text">Byes auto-added for non power-of-2
+                      counts</span></span></label>
+                <div class="fg-stepper">
+                  <button class="fg-stepper-btn" onclick="stepperChange('bracket-teams',-1,2,128)">&#8722;</button>
+                  <span class="fg-stepper-val" id="bracket-teams">8</span>
+                  <button class="fg-stepper-btn" onclick="stepperChange('bracket-teams',1,2,128)">+</button>
+                </div>
+                <div class="fg-hint" id="bracket-teams-hint">Power of 2 &#8212; no byes needed</div>
+                <div class="fg-byes-pill hidden" id="bracket-byes-pill">&#9888;&#65039; <span
+                    id="bracket-byes-count">0</span> byes will be added</div>
+              </div>
+              <div class="fg-field">
+                <label class="fg-label">Seeding Method</label>
+                <div class="fg-toggle-group" id="seed-toggle">
+                  <button class="fg-toggle-btn active" onclick="setToggle(this,'seed-toggle')">&#127922; Random</button>
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'seed-toggle')">&#9999;&#65039; Manual</button>
+                </div>
+                <div class="fg-hint">Manual seeding: drag-and-drop after generation</div>
+              </div>
+              <div class="fg-field">
+                <label class="fg-label">Grand Finals Format</label>
+                <div class="fg-toggle-group" id="gf-toggle">
+                  <button class="fg-toggle-btn active" onclick="setToggle(this,'gf-toggle')">Same as Rounds</button>
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'gf-toggle')">Bo5 Locked</button>
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'gf-toggle')">Bo7</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- POINTS TABLE RULES -->
+        <div class="fg-rules-panel" id="rules-points">
+          <div class="fg-rule-section">
+            <div class="fg-rule-section-title">Basic Information</div>
+            <div class="fg-form-grid">
+              <div class="fg-field fg-field-full">
+                <label class="fg-label" for="pts-name">Tournament Name</label>
+                <input class="fg-input" id="pts-name" type="text" placeholder="e.g. VRGC BGMI DOMINANCE BATTLE S4"
+                  autocomplete="off">
+              </div>
+              <div class="fg-field">
+                <label class="fg-label" for="pts-game-title">Game Title</label>
+                <select class="fg-select" id="pts-game-title">
+                  <option value="bgmi">BGMI</option>
+                  <option value="ff">Free Fire</option>
+                  <option value="ff-max">Free Fire MAX</option>
+                  <option value="cod">COD Mobile</option>
+                  <option value="pubg">PUBG Mobile</option>
+                  <option value="other">Other / Custom</option>
+                </select>
+              </div>
+              <div class="fg-field">
+                <label class="fg-label" for="pts-date">Tournament Date</label>
+                <input class="fg-input" id="pts-date" type="date" style="color-scheme:dark;">
+              </div>
+              <div class="fg-field">
+                <label class="fg-label" for="pts-prize">Prize Pool</label>
+                <input class="fg-input" id="pts-prize" type="text" placeholder="e.g. &#8377;2,00,000"
+                  autocomplete="off">
+              </div>
+              <div class="fg-field">
+                <label class="fg-label" for="pts-organizer">Organizer Name</label>
+                <input class="fg-input" id="pts-organizer" type="text" placeholder="e.g. VRGC Events Team"
+                  autocomplete="off">
+              </div>
+            </div>
+          </div>
+          <div class="fg-rule-section">
+            <div class="fg-rule-section-title">Match Structure</div>
+            <div class="fg-form-grid">
+              <div class="fg-field">
+                <label class="fg-label">Number of Squads <span class="fg-tooltip-wrap"><span
+                      class="fg-tooltip-icon">?</span><span class="fg-tooltip-text">Total squads competing across all
+                      matches</span></span></label>
+                <div class="fg-stepper">
+                  <button class="fg-stepper-btn" onclick="stepperChange('pts-squads',-1,4,25)">&#8722;</button>
+                  <span class="fg-stepper-val" id="pts-squads">16</span>
+                  <button class="fg-stepper-btn" onclick="stepperChange('pts-squads',1,4,25)">+</button>
+                </div>
+                <div class="fg-hint">4&#8211;25 squads supported</div>
+              </div>
+              <div class="fg-field">
+                <label class="fg-label">Matches Per Cycle <span class="fg-tooltip-wrap"><span
+                      class="fg-tooltip-icon">?</span><span class="fg-tooltip-text">How many maps/matches every squad
+                      plays before final standings</span></span></label>
+                <div class="fg-stepper">
+                  <button class="fg-stepper-btn"
+                    onclick="stepperChange('pts-matches',-1,1,10); updateMatchesHint()">&#8722;</button>
+                  <span class="fg-stepper-val" id="pts-matches">6</span>
+                  <button class="fg-stepper-btn"
+                    onclick="stepperChange('pts-matches',1,1,10); updateMatchesHint()">+</button>
+                </div>
+                <div class="fg-hint">Each squad plays all <span id="pts-matches-hint">6</span> matches</div>
+              </div>
+              <div class="fg-field">
+                <label class="fg-label">Squads Per Lobby</label>
+                <div class="fg-toggle-group" id="lobby-size-toggle">
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'lobby-size-toggle')">12</button>
+                  <button class="fg-toggle-btn active" onclick="setToggle(this,'lobby-size-toggle')">16</button>
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'lobby-size-toggle')">20</button>
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'lobby-size-toggle')">25</button>
+                </div>
+                <div class="fg-hint">BGMI standard: 25 per lobby</div>
+              </div>
+              <div class="fg-field">
+                <label class="fg-label">Map Rotation</label>
+                <div class="fg-toggle-group" id="map-toggle">
+                  <button class="fg-toggle-btn active" onclick="setToggle(this,'map-toggle')">Auto</button>
+                  <button class="fg-toggle-btn" onclick="setToggle(this,'map-toggle')">Fixed</button>
+                </div>
+                <div class="fg-hint">Auto: Erangel &#8594; Miramar &#8594; Sanhok</div>
+              </div>
+            </div>
+          </div>
+          <div class="fg-rule-section">
+            <div class="fg-rule-section-title">Points System</div>
+            <div style="margin-bottom:1.25rem;">
+              <div class="fg-label" style="margin-bottom:0.6rem;">Load Preset</div>
+              <div class="fg-preset-row">
+                <button class="fg-preset-chip active" onclick="loadPreset('bgmi-standard',this)">BGMI Standard</button>
+                <button class="fg-preset-chip" onclick="loadPreset('bgmi-esports',this)">BGMI Esports</button>
+                <button class="fg-preset-chip" onclick="loadPreset('ff-standard',this)">Free Fire Standard</button>
+                <button class="fg-preset-chip" onclick="loadPreset('custom',this)">Custom</button>
+              </div>
+            </div>
+            <div class="fg-form-grid" style="margin-bottom:1.5rem;">
+              <div class="fg-field">
+                <label class="fg-label">Kill Points (per kill) <span class="fg-tooltip-wrap"><span
+                      class="fg-tooltip-icon">?</span><span class="fg-tooltip-text">Points per elimination in a single
+                      match</span></span></label>
+                <div class="fg-stepper">
+                  <button class="fg-stepper-btn" onclick="stepperChange('kill-pts',-1,0,10)">&#8722;</button>
+                  <span class="fg-stepper-val" id="kill-pts">1</span>
+                  <button class="fg-stepper-btn" onclick="stepperChange('kill-pts',1,0,10)">+</button>
+                </div>
+              </div>
+              <div class="fg-field">
+                <label class="fg-label">Kill Point Cap (per match) <span class="fg-tooltip-wrap"><span
+                      class="fg-tooltip-icon">?</span><span class="fg-tooltip-text">Max kill pts a squad can earn per
+                      match. 0 = no cap.</span></span></label>
+                <div class="fg-stepper">
+                  <button class="fg-stepper-btn"
+                    onclick="stepperChange('kill-cap',-1,0,50); updateKillCapHint()">&#8722;</button>
+                  <span class="fg-stepper-val" id="kill-cap">8</span>
+                  <button class="fg-stepper-btn"
+                    onclick="stepperChange('kill-cap',1,0,50); updateKillCapHint()">+</button>
+                </div>
+                <div class="fg-hint" id="kill-cap-hint">Max 8 kill pts per match</div>
+              </div>
+            </div>
+            <div class="fg-rule-section"
+              style="background:rgba(123,47,255,0.06);border-color:rgba(123,47,255,0.2);padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+                <div>
+                  <div
+                    style="font-family:var(--font-head);font-size:0.9rem;font-weight:700;color:var(--white);margin-bottom:0.25rem;">
+                    &#127954; WWCD Bonus</div>
+                  <div style="font-size:0.82rem;color:var(--white-muted);">Winner Winner Chicken Dinner &mdash; extra
+                    bonus per match win</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.85rem;flex-wrap:wrap;">
+                  <div class="fg-stepper" style="width:130px;">
+                    <button class="fg-stepper-btn" onclick="stepperChange('wwcd-pts',-1,0,20)">&#8722;</button>
+                    <span class="fg-stepper-val" id="wwcd-pts">0</span>
+                    <button class="fg-stepper-btn" onclick="stepperChange('wwcd-pts',1,0,20)">+</button>
+                  </div>
+                  <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--white-muted);">pts/win</div>
+                  <div class="fg-toggle-group" id="wwcd-toggle" style="width:fit-content;">
+                    <button class="fg-toggle-btn active" onclick="setToggle(this,'wwcd-toggle')">OFF</button>
+                    <button class="fg-toggle-btn" onclick="setToggle(this,'wwcd-toggle')">ON</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="fg-label" style="margin-bottom:0.75rem;">Placement Points Table <span
+                class="fg-tooltip-wrap"><span class="fg-tooltip-icon">?</span><span class="fg-tooltip-text">Points per
+                  placement position. Fully editable.</span></span></div>
+            <div class="fg-pts-table-wrap">
+              <table class="fg-pts-table" id="placement-table">
+                <thead>
+                  <tr>
+                    <th>Placement</th>
+                    <th>Points</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="placement-tbody"></tbody>
+              </table>
+            </div>
+            <div class="fg-pts-table-actions">
+              <button class="fg-pts-action-btn" onclick="addPlacementRow()">+ Add Row</button>
+              <button class="fg-pts-action-btn danger" onclick="removeLastPlacementRow()">&#8722; Remove Last</button>
+              <button class="fg-pts-action-btn" onclick="resetToPreset()">&#8635; Reset to Preset</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="fg-nav-row">
+          <button class="fg-back-btn" onclick="goToStep(1)">&#8592; Back</button>
+          <button class="fg-next-btn" onclick="goToStep(3)">Continue &#8594; Add Teams</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: TEAMS -->
+      <div class="fg-panel" id="panel-step-3">
+        <div class="fg-section-header">
+          <div class="fg-section-tag">Step 3 of 4</div>
+          <h2 class="fg-section-title">ADD <span id="step3-title-word">TEAMS</span></h2>
+          <p class="fg-section-sub" id="step3-sub">Enter participant names. You can paste a list or add them one by one.
+            Names can be reordered after generation.</p>
+        </div>
+        <div class="fg-team-counter">
+          <div>
+            <div class="fg-counter-label" id="counter-label">Teams Added</div>
+            <div class="fg-counter-val" id="counter-val">0</div>
+          </div>
+          <div style="text-align:center;">
+            <div class="fg-counter-label">Required</div>
+            <div class="fg-counter-val" id="counter-required">&#8212;</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="fg-counter-status" id="counter-status">Add teams to continue</div>
+            <div class="fg-byes-pill hidden" id="byes-pill-step3">&#9888;&#65039; <span id="byes-step3-count">0</span>
+              byes will be added</div>
+          </div>
+        </div>
+        <div class="fg-team-entry-tabs">
+          <button class="fg-tab-btn active" id="tab-one" onclick="switchTeamTab('one')">One by One</button>
+          <button class="fg-tab-btn" id="tab-paste" onclick="switchTeamTab('paste')">Paste List</button>
+        </div>
+        <div class="fg-tab-panel active" id="tab-panel-one">
+          <div class="fg-team-list" id="team-list"></div>
+          <div class="fg-add-team-row">
+            <input class="fg-add-team-input" id="add-team-input" type="text" placeholder="Team / Squad name..."
+              autocomplete="off" onkeydown="if(event.key==='Enter')addTeam()">
+            <button class="fg-add-btn" onclick="addTeam()">+ Add</button>
+          </div>
+          <div class="fg-hint" style="margin-top:0.6rem;">Press Enter or click Add. Drag &#10756; handle to reorder.
+          </div>
+        </div>
+        <div class="fg-tab-panel" id="tab-panel-paste">
+          <textarea class="fg-textarea" id="paste-input" rows="10"
+            placeholder="Paste team names here, one per line:&#10;Team Alpha&#10;Team Beta&#10;Team Gamma&#10;..."
+            oninput="parsePasteList(this.value)"
+            style="min-height:220px;font-family:var(--font-mono);font-size:0.88rem;"></textarea>
+          <div class="fg-hint" style="margin-top:0.5rem;">One team per line. Blank lines are ignored.</div>
+        </div>
+        <div class="fg-nav-row">
+          <button class="fg-back-btn" onclick="goToStep(2)">&#8592; Back</button>
+          <button class="fg-generate-btn" id="generate-btn" disabled onclick="generateFixture()">
+            &#9889; Generate Fixture
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 4: GENERATED FIXTURE & POSTER -->
+      <div class="fg-panel" id="panel-step-4">
+        <div class="fg-section-header"
+          style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+          <div>
+            <div class="fg-section-tag" id="step4-tag">Fixture Generated</div>
+            <h2 class="fg-section-title" id="step4-title">YOUR <span>FIXTURE</span></h2>
+            <p class="fg-section-sub" id="step4-sub">Click teams to mark winners. Bracket auto-advances. Export a poster
+              when ready.</p>
+          </div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+            <button class="fg-pts-action-btn" onclick="resetAndGoBack()">&#8635; Reset &amp; Edit</button>
+            <button class="fg-pts-action-btn" onclick="openPosterModal()"
+              style="border-color:rgba(168,85,247,0.5);color:var(--purple-bright);">&#127912; Generate Poster</button>
+            <button class="fg-generate-btn" style="padding:0.75rem 1.5rem;font-size:0.82rem;"
+              onclick="openPosterModal()">&#9889; Export PNG</button>
+          </div>
+        </div>
+
+        <!-- BRACKET VIEW -->
+        <div id="bracket-view-wrap" style="display:none;">
+          <div class="bk-controls">
+            <div class="bk-legend">
+              <span class="bk-leg-item"><span class="bk-leg-dot winner"></span>Winner</span>
+              <span class="bk-leg-item"><span class="bk-leg-dot bye"></span>BYE (auto-advance)</span>
+              <span class="bk-leg-item"><span class="bk-leg-dot tbd"></span>TBD</span>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--white-subtle);">Click a team slot to
+              mark as winner</div>
+          </div>
+          <div class="bk-scroll-wrap">
+            <div class="bk-container" id="bk-container">
+              <!-- Rendered by JS -->
+            </div>
+            <svg class="bk-svg" id="bk-svg" style="position:absolute;top:0;left:0;pointer-events:none;"></svg>
+          </div>
+        </div>
+
+        <!-- POINTS TABLE VIEW -->
+        <div id="points-view-wrap" style="display:none;">
+          <!-- LIVE STANDINGS TABLE -->
+          <div class="pts-section-label">&#128202; Live Standings</div>
+          <div class="pts-standings-wrap">
+            <table class="pts-standings-table" id="pts-standings-table">
+              <thead>
+                <tr>
+                  <th style="width:40px;">#</th>
+                  <th>Squad</th>
+                  <th>Matches</th>
+                  <th>Total Kills</th>
+                  <th>Place Pts</th>
+                  <th>WWCD</th>
+                  <th style="color:var(--purple-bright);">TOTAL</th>
+                </tr>
+              </thead>
+              <tbody id="pts-standings-body">
+                <!-- Rendered by JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- MATCH ENTRY GRID -->
+          <div class="pts-section-label" style="margin-top:2.5rem;">&#9654;&#65038; Match-by-Match Score Entry</div>
+          <div class="pts-match-grid" id="pts-match-grid">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- ROUND ROBIN VIEW -->
+        <div id="roundrobin-view-wrap" style="display:none;">
+          <div class="pts-section-label">&#128257; Round Robin Schedule</div>
+          <div class="rr-schedule-wrap" id="rr-schedule-wrap">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <div class="fg-nav-row" style="margin-top:2rem;">
+          <button class="fg-back-btn" onclick="resetAndGoBack()">&#8592; Back to Teams</button>
+          <button class="fg-generate-btn" onclick="openPosterModal()">&#127912; Generate &amp; Export Poster</button>
+        </div>
+      </div>
+
+      <!-- POSTER MODAL -->
+      <div class="poster-overlay" id="poster-overlay" onclick="closePosterModal(event)">
+        <div class="poster-modal" id="poster-modal-box">
+          <button class="poster-modal-close" onclick="closePosterModal()">&#10005;</button>
+
+          <div class="poster-modal-left">
+            <div class="fg-section-tag" style="margin-bottom:0.5rem;">Generate Poster</div>
+            <h3 style="font-family:var(--font-display);font-size:2rem;color:#fff;margin-bottom:1.5rem;">EXPORT<br><span
+                style="color:var(--purple-bright)">GRAPHIC</span></h3>
+
+            <!-- Template selector -->
+            <div class="fg-label" style="margin-bottom:0.6rem;">Design Template</div>
+            <div class="poster-templates">
+              <button class="poster-tpl-btn active" id="tpl-btn-0" onclick="selectPosterTemplate(0)">
+                <div class="ptb-preview" style="background:linear-gradient(135deg,#080010,#2a0550);"></div>
+                <span>Dark Purple</span>
+              </button>
+              <button class="poster-tpl-btn" id="tpl-btn-1" onclick="selectPosterTemplate(1)">
+                <div class="ptb-preview"
+                  style="background:linear-gradient(135deg,#000d1a,#001a33);border:1px solid #00fff7;"></div>
+                <span>Neon Cyber</span>
+              </button>
+              <button class="poster-tpl-btn" id="tpl-btn-2" onclick="selectPosterTemplate(2)">
+                <div class="ptb-preview" style="background:linear-gradient(135deg,#0a0a0a,#1a1a1a);"></div>
+                <span>Minimal Dark</span>
+              </button>
+              <button class="poster-tpl-btn" id="tpl-btn-3" onclick="selectPosterTemplate(3)">
+                <div class="ptb-preview"
+                  style="background:linear-gradient(135deg,#1a0800,#3a1500);border:1px solid #f59e0b;"></div>
+                <span>Champion Gold</span>
+              </button>
+            </div>
+
+            <!-- Editable fields -->
+            <div class="fg-label" style="margin-top:1.25rem;margin-bottom:0.6rem;">Poster Content</div>
+            <div style="display:flex;flex-direction:column;gap:0.65rem;">
+              <input class="fg-input" id="poster-event-name" type="text" placeholder="Event Name"
+                oninput="renderPosterCanvas()">
+              <input class="fg-input" id="poster-date" type="text" placeholder="Date  (e.g. Sep 15, 2026)"
+                oninput="renderPosterCanvas()">
+              <input class="fg-input" id="poster-prize" type="text" placeholder="Prize Pool (e.g. &#8377;1,50,000)"
+                oninput="renderPosterCanvas()">
+              <input class="fg-input" id="poster-subtitle" type="text" placeholder="Subtitle / Tag line"
+                oninput="renderPosterCanvas()">
+            </div>
+
+            <!-- Size selector -->
+            <div class="fg-label" style="margin-top:1.25rem;margin-bottom:0.6rem;">Export Size</div>
+            <div class="fg-toggle-group" id="poster-size-toggle" style="margin-bottom:0.5rem;">
+              <button class="fg-toggle-btn active"
+                onclick="setToggle(this,'poster-size-toggle');renderPosterCanvas()">Square (1080)</button>
+              <button class="fg-toggle-btn" onclick="setToggle(this,'poster-size-toggle');renderPosterCanvas()">Story
+                (1080x1920)</button>
+              <button class="fg-toggle-btn" onclick="setToggle(this,'poster-size-toggle');renderPosterCanvas()">Wide
+                (1920x1080)</button>
+            </div>
+            <!-- Legibility warning element -->
+            <div id="poster-scale-warning" class="fg-hint"
+              style="margin-bottom:1.25rem;padding:0.45rem 0.75rem;border-radius:6px;display:none;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#f59e0b;font-size:0.68rem;line-height:1.4;">
+            </div>
+
+            <button class="fg-generate-btn" style="width:100%;justify-content:center;padding:1rem;"
+              onclick="exportPosterPNG()">
+              &#11015;&#65038; Download PNG
+            </button>
+          </div>
+
+          <div class="poster-modal-right">
+            <div class="fg-label" style="margin-bottom:0.75rem;">Live Bracket / Standings Poster Preview</div>
+            <div class="poster-canvas-wrap">
+              <canvas id="poster-canvas" width="540" height="540"></canvas>
+            </div>
+            <div
+              style="font-family:var(--font-mono);font-size:0.6rem;color:var(--white-subtle);text-align:center;margin-top:0.75rem;">
+              Full vector bracket lines and live match results. Export renders at 1080px+ full resolution.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- UPCOMING PHASES -->
+    <section
+      style="background:rgba(123,47,255,0.05);border-top:1px solid rgba(123,47,255,0.15);padding:5rem var(--pad);">
+      <div style="max-width:1100px;margin:0 auto;">
+        <div class="fg-section-tag" style="margin-bottom:1rem;">Feature Suite</div>
+        <h2 class="fg-section-title" style="margin-bottom:3rem;">ORGANIZER <span>CAPABILITIES</span></h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;">
+          <div class="fg-rule-section" style="margin:0;">
+            <div style="font-size:2rem;margin-bottom:1rem;">&#128256;</div>
+            <div
+              style="font-family:var(--font-mono);font-size:0.65rem;color:var(--purple-bright);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.6rem;">
+              Format Engine</div>
+            <div
+              style="font-family:var(--font-display);font-size:1.8rem;color:var(--white);margin-bottom:0.75rem;line-height:1;">
+              BRACKETS &amp; TABLES</div>
+            <div style="font-size:0.85rem;color:var(--white-muted);line-height:1.6;">Auto-generated bracket trees,
+              round-robin pairings, and multi-lobby Battle Royale cycles. Bye management for non-power-of-2 teams.</div>
+          </div>
+          <div class="fg-rule-section" style="margin:0;">
+            <div style="font-size:2rem;margin-bottom:1rem;">&#128202;</div>
+            <div
+              style="font-family:var(--font-mono);font-size:0.65rem;color:var(--purple-bright);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.6rem;">
+              Control Panel</div>
+            <div
+              style="font-family:var(--font-display);font-size:1.8rem;color:var(--white);margin-bottom:0.75rem;line-height:1;">
+              LIVE RESULTS ENTRY</div>
+            <div style="font-size:0.85rem;color:var(--white-muted);line-height:1.6;">Click any match to advance the
+              winning team into the next round. Real-time standings calculation with kill caps and WWCD bonuses.</div>
+          </div>
+          <div class="fg-rule-section" style="margin:0;">
+            <div style="font-size:2rem;margin-bottom:1rem;">&#128247;</div>
+            <div
+              style="font-family:var(--font-mono);font-size:0.65rem;color:var(--purple-bright);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.6rem;">
+              Graphic Studio</div>
+            <div
+              style="font-family:var(--font-display);font-size:1.8rem;color:var(--white);margin-bottom:0.75rem;line-height:1;">
+              DYNAMIC POSTERS</div>
+            <div style="font-size:0.85rem;color:var(--white-muted);line-height:1.6;">Export high-resolution tournament
+              posters in 4 distinct themes with full bracket trees, connecting lines, and standings tables.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="ink-footer">
+    <div class="if-top">
+      <div>
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem">
+          <img src="../vrgc_logo.jpg" alt="VRGC" style="height:38px;border-radius:4px">
+          <span class="if-brand-title">VRGC</span>
+        </div>
+        <p class="if-brand-desc">Virtual Reality and Gaming Club &mdash; VIT Bhopal University.<br>E-SPORTS &bull;
+          DEVELOPMENT &bull; WORKSHOP &bull; BOOTCAMP</p>
+      </div>
+      <div class="if-links-grid">
+        <div class="if-col">
+          <h4>PAGES</h4>
+          <ul>
+            <li><a href="../index.html">Home</a></li>
+            <li><a href="../about.html">Studio &amp; About</a></li>
+            <li><a href="../events.html">Tournaments</a></li>
+            <li><a href="../live.html">Live Arena</a></li>
+            <li><a href="../community.html">Community</a></li>
+          </ul>
+        </div>
+        <div class="if-col">
+          <h4>TOOLS</h4>
+          <ul>
+            <li><a href="fixture-generator.html">Fixture Generator</a></li>
+          </ul>
+        </div>
+        <div class="if-col">
+          <h4>CONNECT</h4>
+          <ul>
+            <li><a href="#">Discord Server</a></li>
+            <li><a href="#">Instagram @vrgcvitbhopal</a></li>
+            <li><a href="#">YouTube Channel</a></li>
+            <li><a href="#">Twitter / X</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="if-bottom">
+      <span>&copy; 2025 VIRTUAL REALITY AND GAMING CLUB (VRGC) &mdash; VIT BHOPAL. ALL RIGHTS RESERVED.</span>
+      <span style="color:var(--purple-bright)">E-SPORTS | DEVELOPMENT | WORKSHOP | BOOTCAMP</span>
+    </div>
+  </footer>
+
+  <script src="fixture-generator.js?v=1788447921"></script>
+</body>
+
+</html>
