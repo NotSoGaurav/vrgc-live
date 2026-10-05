@@ -1,0 +1,530 @@
+{
+  "23BCE11158": {
+    "id": "23BCE11158",
+    "name": "Shivansh Sharma",
+    "position": "Co-President",
+    "team": "Leadership"
+  },
+  "23BCG10015": {
+    "id": "23BCG10015",
+    "name": "Lokesh Sharma",
+    "position": "Co-President",
+    "team": "Leadership"
+  },
+  "23BCG10089": {
+    "id": "23BCG10089",
+    "name": "Lucky Kumar",
+    "position": "Lead",
+    "team": "Education"
+  },
+  "23MIM10104": {
+    "id": "23MIM10104",
+    "name": "Aayush",
+    "position": "Member",
+    "team": "Design"
+  },
+  "24BAI10259": {
+    "id": "24BAI10259",
+    "name": "Aaryan Maurya",
+    "position": "Core Member",
+    "team": "Esports PC"
+  },
+  "24BCE10241": {
+    "id": "24BCE10241",
+    "name": "Adway Jha",
+    "position": "Co-Lead",
+    "team": "Education"
+  },
+  "24BCE10375": {
+    "id": "24BCE10375",
+    "name": "Kartikeya Agrawal",
+    "position": "Lead",
+    "team": "Esports (PC)"
+  },
+  "24BCE11109": {
+    "id": "24BCE11109",
+    "name": "Pradeepti Srivastava",
+    "position": "Co-Lead",
+    "team": "PR"
+  },
+  "24BCE11133": {
+    "id": "24BCE11133",
+    "name": "Aryan Yadav",
+    "position": "Co-Lead",
+    "team": "Esports (PC)"
+  },
+  "24BCG10003": {
+    "id": "24BCG10003",
+    "name": "Parardha Dhar",
+    "position": "Student Coordinator",
+    "team": "Leadership"
+  },
+  "24BCG10009": {
+    "id": "24BCG10009",
+    "name": "Tannu Kumari",
+    "position": "Core Member",
+    "team": "Design"
+  },
+  "24BCG10051": {
+    "id": "24BCG10051",
+    "name": "Haardik Pahlajani",
+    "position": "Student Coordinator",
+    "team": "Leadership"
+  },
+  "24BCG10077": {
+    "id": "24BCG10077",
+    "name": "Neo Akash",
+    "position": "Lead",
+    "team": "PR"
+  },
+  "24BCG10082": {
+    "id": "24BCG10082",
+    "name": "Riya Agrawal",
+    "position": "Lead",
+    "team": "Design"
+  },
+  "24BCG10096": {
+    "id": "24BCG10096",
+    "name": "Akshay Verma",
+    "position": "Core Member",
+    "team": "Education"
+  },
+  "24BCG10123": {
+    "id": "24BCG10123",
+    "name": "Jay Shakya",
+    "position": "Co-Lead",
+    "team": "Esports (Mobile)"
+  },
+  "24BCG10127": {
+    "id": "24BCG10127",
+    "name": "Jyoti Mudalagi",
+    "position": "Core Member",
+    "team": "Esports (Mobile)"
+  },
+  "24BSA10096": {
+    "id": "24BSA10096",
+    "name": "Rishav Mandal",
+    "position": "Lead",
+    "team": "Technical"
+  },
+  "24BSA10144": {
+    "id": "24BSA10144",
+    "name": "Sai Sovan Pattanayak",
+    "position": "Core Member",
+    "team": "Design"
+  },
+  "25BAI10028": {
+    "id": "25BAI10028",
+    "name": "Nishita Parakh",
+    "position": "Core Member",
+    "team": "Technical"
+  },
+  "25BAI10095": {
+    "id": "25BAI10095",
+    "name": "Aarna Gupta",
+    "position": "Core Member",
+    "team": "Esports(Mobile)"
+  },
+  "25BAI10216": {
+    "id": "25BAI10216",
+    "name": "Aryan Soam",
+    "position": "Core Member",
+    "team": "Esports PC"
+  },
+  "25BAI10263": {
+    "id": "25BAI10263",
+    "name": "Anmol Shrivastava",
+    "position": "Admin",
+    "team": "Technical"
+  },
+  "25BAI10379": {
+    "id": "25BAI10379",
+    "name": "Mann Sharma",
+    "position": "Core Member",
+    "team": "Esports (Mobile)"
+  },
+  "25BAI10466": {
+    "id": "25BAI10466",
+    "name": "Krishna Sharma",
+    "position": "Core Member",
+    "team": "Esports (PC)"
+  },
+  "25BAI10563": {
+    "id": "25BAI10563",
+    "name": "Nilay Gurdasani",
+    "position": "Core Member",
+    "team": "Esports(Mobile)"
+  },
+  "25BAI11172": {
+    "id": "25BAI11172",
+    "name": "Jayant Yadav",
+    "position": "Core Member",
+    "team": "Esports (Mobile)"
+  },
+  "25BAI11261": {
+    "id": "25BAI11261",
+    "name": "Dhruv Gupta",
+    "position": "Core Member",
+    "team": "Esports(Mobile)"
+  },
+  "25BAI11411": {
+    "id": "25BAI11411",
+    "name": "Poorab Prakash Singh",
+    "position": "Core Member",
+    "team": "Esports (PC)"
+  },
+  "25BAI11474": {
+    "id": "25BAI11474",
+    "name": "Jainam Jain",
+    "position": "Core Member",
+    "team": "Esports (Mobile)"
+  },
+  "25BAI11615": {
+    "id": "25BAI11615",
+    "name": "Harshvardhan Singh",
+    "position": "Core Member",
+    "team": "PR"
+  },
+  "25BCE10027": {
+    "id": "25BCE10027",
+    "name": "Eshaan Sharma",
+    "position": "Core Member",
+    "team": "PR"
+  },
+  "25BCE10300": {
+    "id": "25BCE10300",
+    "name": "Uday Deval Chaturvedi",
+    "position": "Core Member",
+    "team": "Esports (Mobile)"
+  },
+  "25BCE10329": {
+    "id": "25BCE10329",
+    "name": "Rishi Jain",
+    "position": "Core Member",
+    "team": "Esports (PC)"
+  },
+  "25BCE10483": {
+    "id": "25BCE10483",
+    "name": "Aryan Mahendra",
+    "position": "Core Member",
+    "team": "Esports (PC)"
+  },
+  "25BCE10699": {
+    "id": "25BCE10699",
+    "name": "Siddhant Bandil",
+    "position": "Lead",
+    "team": "Social Media"
+  },
+  "25BCE10933": {
+    "id": "25BCE10933",
+    "name": "Manish Sharma",
+    "position": "Core Member",
+    "team": "PR"
+  },
+  "25BCE11069": {
+    "id": "25BCE11069",
+    "name": "S Pratik",
+    "position": "Core Member",
+    "team": "Esports (PC)"
+  },
+  "25BCE11169": {
+    "id": "25BCE11169",
+    "name": "Ayushi Gupta",
+    "position": "Core Member",
+    "team": "Design"
+  },
+  "25BCE11179": {
+    "id": "25BCE11179",
+    "name": "Manan Sharma",
+    "position": "Core Member",
+    "team": "PR"
+  },
+  "25BCG10002": {
+    "id": "25BCG10002",
+    "name": "Tanmay",
+    "position": "Core Member",
+    "team": "Education"
+  },
+  "25BCG10003": {
+    "id": "25BCG10003",
+    "name": "Eishaan Tiwari",
+    "position": "Core Member",
+    "team": "Education"
+  },
+  "25BCG10004": {
+    "id": "25BCG10004",
+    "name": "Shandilya Gupta",
+    "position": "Core Member",
+    "team": "Esports (PC)"
+  },
+  "25BCG10008": {
+    "id": "25BCG10008",
+    "name": "Mohit Borekar",
+    "position": "Member",
+    "team": "Technical"
+  },
+  "25BCG10011": {
+    "id": "25BCG10011",
+    "name": "shubham Sharma",
+    "position": "Core Member",
+    "team": "Esports(PC)"
+  },
+  "25BCG10018": {
+    "id": "25BCG10018",
+    "name": "Sameer Chaudhary",
+    "position": "Core Member",
+    "team": "Design"
+  },
+  "25BCG10022": {
+    "id": "25BCG10022",
+    "name": "Siddhant Walia",
+    "position": "Core Member",
+    "team": "Esports (PC)"
+  },
+  "25BCG10024": {
+    "id": "25BCG10024",
+    "name": "Jayant Patel",
+    "position": "Core Member",
+    "team": "Esports (PC)"
+  },
+  "25BCG10032": {
+    "id": "25BCG10032",
+    "name": "Praveen Gurjar",
+    "position": "Core Member",
+    "team": "PR"
+  },
+  "25BCG10035": {
+    "id": "25BCG10035",
+    "name": "Aron Smith Thomas",
+    "position": "Core Member",
+    "team": "Social Media"
+  },
+  "25BCG10039": {
+    "id": "25BCG10039",
+    "name": "Rudraksh Adchitre",
+    "position": "Core Member",
+    "team": "Esports(PC)"
+  },
+  "25BCG10040": {
+    "id": "25BCG10040",
+    "name": "Yashi Dwivedi",
+    "position": "Core Member",
+    "team": "Social Media"
+  },
+  "25BCY10118": {
+    "id": "25BCY10118",
+    "name": "Abhra Banerjee",
+    "position": "Core Member",
+    "team": "Esports(PC)"
+  },
+  "25BCY10254": {
+    "id": "25BCY10254",
+    "name": "Abhinav Mishra",
+    "position": "Co-Lead",
+    "team": "Technical"
+  },
+  "25BCY10268": {
+    "id": "25BCY10268",
+    "name": "Jaiyansh Dhaulakhandi",
+    "position": "Core Member",
+    "team": "Technical"
+  },
+  "25BHI10010": {
+    "id": "25BHI10010",
+    "name": "Apurba Das",
+    "position": "Core Member",
+    "team": "Technical"
+  },
+  "25BOE10112": {
+    "id": "25BOE10112",
+    "name": "Swastika Acharya",
+    "position": "Core Member",
+    "team": "Social Media"
+  },
+  "25BOE10149": {
+    "id": "25BOE10149",
+    "name": "Rishika Ratnam",
+    "position": "Core Member",
+    "team": "Esports (PC)"
+  },
+  "25BSA10171": {
+    "id": "25BSA10171",
+    "name": "Jivan Deshmukh",
+    "position": "Core Member",
+    "team": "Technical"
+  },
+  "25MIM10104": {
+    "id": "25MIM10104",
+    "name": "Khushboo Vinod Patil",
+    "position": "Core Member",
+    "team": "Esports(Mobile)"
+  },
+  "25MIP10063": {
+    "id": "25MIP10063",
+    "name": "Piyush Varshney",
+    "position": "Core Member",
+    "team": "Education"
+  },
+  "25MIP10089": {
+    "id": "25MIP10089",
+    "name": "Aditi Sharma",
+    "position": "Core Member",
+    "team": "Design"
+  },
+  "25MIP10094": {
+    "id": "25MIP10094",
+    "name": "NAYAN VERMA",
+    "position": "Core Member",
+    "team": "Education"
+  },
+  "26BAI10462": {
+    "id": "26BAI10462",
+    "name": "Atharva Jain",
+    "position": "Core Member",
+    "team": "Esports(Mobile)"
+  },
+  "26BAI10508": {
+    "id": "26BAI10508",
+    "name": "Utsav Pandey",
+    "position": "Core Member",
+    "team": "Education"
+  },
+  "26BCE10965": {
+    "id": "26BCE10965",
+    "name": "Shubhranshu Tiwari",
+    "position": "Core Member",
+    "team": "Esports(Mobile)"
+  },
+  "26BCE11062": {
+    "id": "26BCE11062",
+    "name": "Suryansh Arya",
+    "position": "Core Member",
+    "team": "Education"
+  },
+  "26BCE11319": {
+    "id": "26BCE11319",
+    "name": "Chinmay Patil",
+    "position": "Core Member",
+    "team": "Education"
+  },
+  "26BCE11441": {
+    "id": "26BCE11441",
+    "name": "Akshat Chhitarka",
+    "position": "Core Member",
+    "team": "Esports (Mobile)"
+  },
+  "26BSA10044": {
+    "id": "26BSA10044",
+    "name": "Anurag prasad",
+    "position": "Core Member",
+    "team": "Esports(Mobile)"
+  },
+  "25BCE11165": {
+    "id": "25BCE11165",
+    "name": "Afiya Begum",
+    "position": "Core Member",
+    "team": "Design"
+  },
+  "25MIP10007": {
+    "id": "25MIP10007",
+    "name": "Ananya Pandey",
+    "position": "Core Member",
+    "team": "Esports(PC)"
+  },
+  "25BAI11393": {
+    "id": "25BAI11393",
+    "name": "ANKESH RAJ",
+    "position": "Core Member",
+    "team": "Social Media"
+  },
+  "25BAI10693": {
+    "id": "25BAI10693",
+    "name": "Aryan Raj",
+    "position": "Core Member",
+    "team": "Technical"
+  },
+  "24BAI10199": {
+    "id": "24BAI10199",
+    "name": "B Pranit",
+    "position": "Core Member",
+    "team": "Esports(PC)"
+  },
+  "24BAC10038": {
+    "id": "24BAC10038",
+    "name": "Eipshita Basuli",
+    "position": "Core Member",
+    "team": "Design"
+  },
+  "25BAI10797": {
+    "id": "25BAI10797",
+    "name": "Gaurav Tiwari",
+    "position": "Member",
+    "team": "Technical"
+  },
+  "25BCE10959": {
+    "id": "25BCE10959",
+    "name": "Humaid Khan",
+    "position": "Core Member",
+    "team": "Esports(PC)"
+  },
+  "26BCE10222": {
+    "id": "26BCE10222",
+    "name": "Kartikey Raj Shukla",
+    "position": "Core Member",
+    "team": "Esports(Mobile)"
+  },
+  "25BCG10014": {
+    "id": "25BCG10014",
+    "name": "Kshitij Singh",
+    "position": "Core Member",
+    "team": "PR"
+  },
+  "25BAI10831": {
+    "id": "25BAI10831",
+    "name": "Nek Mohan Mehta",
+    "position": "Core Member",
+    "team": "Social Media"
+  },
+  "25BAI11225": {
+    "id": "25BAI11225",
+    "name": "Priyanshu Choudhary",
+    "position": "Core Member",
+    "team": "Education"
+  },
+  "25BCY10253": {
+    "id": "25BCY10253",
+    "name": "Ravi kumar",
+    "position": "Core Member",
+    "team": "Technical"
+  },
+  "25BCY10086": {
+    "id": "25BCY10086",
+    "name": "Ritambhar Advait",
+    "position": "Core Member",
+    "team": "Technical"
+  },
+  "25BCE10914": {
+    "id": "25BCE10914",
+    "name": "Ritul jain",
+    "position": "Core Member",
+    "team": "Social Media"
+  },
+  "24BCE10570": {
+    "id": "24BCE10570",
+    "name": "Sanidhya Porwal",
+    "position": "Core Member",
+    "team": "Design"
+  },
+  "25BCG10007": {
+    "id": "25BCG10007",
+    "name": "Sidharth",
+    "position": "Core Member",
+    "team": "PR"
+  },
+  "25BCE10642": {
+    "id": "25BCE10642",
+    "name": "Suyash Singh",
+    "position": "Core Member",
+    "team": "Esports(PC)"
+  }
+}
