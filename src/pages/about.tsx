@@ -683,7 +683,7 @@ export const getStaticProps: GetStaticProps = async () => {
   try {
     data = await fetchClubData();
   } catch {
-    // Supabase/Firestore unreachable — render page with fallback state
+    // Firestore unreachable — render page with fallback state
   }
   return {
     props: {
